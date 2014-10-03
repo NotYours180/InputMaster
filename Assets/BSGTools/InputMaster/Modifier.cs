@@ -19,7 +19,7 @@ using System;
 
 namespace BSGTools.IO {
 	/// <summary>
-	/// Represents a Modifier for a KeyBinding.
+	/// Represents a Modifier for a control.
 	/// </summary>
 	public sealed class ModifierKey {
 
