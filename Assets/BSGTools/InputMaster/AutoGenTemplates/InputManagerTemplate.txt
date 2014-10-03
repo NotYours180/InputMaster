@@ -1,0 +1,17 @@
+using UnityEngine;
+using BSGTools.IO;
+using BSGTools.Structure;
+#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
+using BSGTools.IO.Xbox;
+#endif
+
+public class {0} : Singleton<{0}> {{
+
+	public InputMaster Master {{ get; private set; }}
+	
+{1}
+
+	void Awake(){{
+		Master = InputMaster.CreateMaster(this);
+	}}
+}}

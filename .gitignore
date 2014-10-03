@@ -1,0 +1,34 @@
+# ================================ #
+# An inverted .gitignore for Unity #
+# ================================ #
+
+# Ignore Everything By Default
+/*
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Plugins
+Assets/AssetStoreTools/
+Assets/UnityVS/
+AssetStoreTools.meta
+UnityVS.meta
+
+# Generic Dont Commit
+Assets/NoCommit/
+NoCommit.meta
+
+# What we want to keep (inverted)
+!*.unitypackage
+!.gitignore
+!ProjectSettings/
+!Assets/
+!LICENSE
+!README.md

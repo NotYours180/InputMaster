@@ -1,0 +1,11 @@
+	[HideInInspector]
+	public XButtonControl[] {0} = XButtonControl.CreateMultiple({1}, new XButtonControl(XButton.{2}, XButton.{3}) {{
+		Dead = {4}f,
+		Gravity = {5}f,
+		Invert = {6},
+		IsBlocked = {7},
+		IsDebugControl = {8},
+		Name = "{9}",
+		Sensitivity = {10}f,
+		Snap = {11}
+	}});
