@@ -1,0 +1,11 @@
+	[HideInInspector]
+	public XTriggerControl {0} = new XTriggerControl(XTrigger.{1}) {{
+		Dead = {2}f,
+		Gravity = {3}f,
+		Invert = {4},
+		IsBlocked = {5},
+		IsDebugControl = {6},
+		Name = "{7}",
+		Sensitivity = {8}f,
+		Snap = {9}
+	}};

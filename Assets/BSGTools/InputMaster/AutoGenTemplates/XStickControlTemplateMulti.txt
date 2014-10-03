@@ -1,0 +1,11 @@
+	[HideInInspector]
+	public XStickControl[] {0} = XStickControl.CreateMultiple({1}, new XStickControl(XStick.{2}) {{
+		Dead = {3}f,
+		Gravity = {4}f,
+		Invert = {5},
+		IsBlocked = {6},
+		IsDebugControl = {7},
+		Name = "{8}",
+		Sensitivity = {9}f,
+		Snap = {10}
+	}});
