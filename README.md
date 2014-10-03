@@ -33,15 +33,15 @@ Pretty easy, right? Just don't edit the big comment at the top of each code file
 
 #### About ###
 InputMaster was designed to accomplish several tasks:
-* Make Input management variable based instead of string based.
-* Allow for configuration of *any* property of a control at runtime.
-* Integrate modern support for Xbox 360 Controllers using XInputDotNET.
+* Make Input management variable based instead of string based. (COMPLETE!)
+* Allow for configuration of *any* property of a control at runtime. (COMPLETE!)
+* Integrate modern support for Xbox 360 Controllers using XInputDotNET (COMPLETE!)
  * Note this is only supported for Windows builds and the Windows Unity Editor. The feature is disabled using preprocessor directives when this is not the case, so you shouldn't get any exceptions.
-* Allow for use of modifier keys!
 * Be comfortable primarily for programmers.
-* Be open source.
+* Support modifier keys!
+* Be open source (**Definitely** COMPLETE!)
 
-To see how InputMaster works in more detail as well as tutorials, please visit the [BSGTools Unity Community Wiki Page](http://wiki.unity3d.com/index.php/BSGTools).
+To see how InputMaster works in more detail, please visit the [BSGTools Unity Community Wiki Page](http://wiki.unity3d.com/index.php/BSGTools).
 
 #### Dependencies ####
 None! InputMaster works in Unity Basic with no requirements or additional packages.
