@@ -47,32 +47,67 @@ namespace BSGTools.IO {
 	public class InputMaster : MonoBehaviour {
 		private List<Control> controls = new List<Control>();
 
-		/// <summary>
-		/// Not yet implemented.
-		/// </summary>
-		public bool AnyKeyDown { get; private set; }
-		/// <summary>
-		/// Not yet implemented.
-		/// </summary>
-		public bool AnyKeyHeld { get; private set; }
-		/// <summary>
-		/// Not yet implemented.
-		/// </summary>
-		public bool AnyKeyUp { get; private set; }
+		/// <value>
+		/// Are any controls in an active Down state?
+		/// </value>
+		public bool AnyControlDown { get; private set; }
+		/// <value>
+		/// Are any controls in an active Held state?
+		/// </value>
+		public bool AnyControlHeld { get; private set; }
+		/// <value>
+		/// Are any controls in an active Up state?
+		/// </value>
+		public bool AnyControlUp { get; private set; }
+
+		/// <value>
+		/// The Mouse X Axis axis name in Unity's Input Manager
+		/// </value>
+		public string MouseXAxisName { get; set; }
+		/// <value>
+		/// The Mouse Y Axis axis name in Unity's Input Manager
+		/// </value>
+		public string MouseYAxisName { get; set; }
+
+		/// <value>
+		/// The Mouse X Axis axis value from Unity's native Input system.
+		/// </value>
+		public float MouseX { get; private set; }
+		/// <value>
+		/// The Mouse Y Axis axis value from Unity's native Input system.
+		/// </value>
+		public float MouseY { get; private set; }
+
+		/// <value>
+		/// The Mouse X Axis raw axis value from Unity's native Input system.
+		/// </value>
+		public float MouseXRaw { get; private set; }
+		/// <value>
+		/// The Mouse Y Axis raw axis value from Unity's native Input system.
+		/// </value>
+		public float MouseYRaw { get; private set; }
 
 		void Update() {
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 			XboxUtils.UpdateStates();
 #endif
 
-			foreach(var c in controls) {
-				if((c.IsDebugControl && Debug.isDebugBuild) || c.IsDebugControl == false)
-					c.Update();
+			if(string.IsNullOrEmpty(MouseXAxisName.Trim()) == false) {
+				MouseX = Input.GetAxis(MouseXAxisName);
+				MouseXRaw = Input.GetAxisRaw(MouseXAxisName);
+			}
+			if(string.IsNullOrEmpty(MouseYAxisName.Trim()) == false) {
+				MouseY = Input.GetAxis(MouseYAxisName);
+				MouseYRaw = Input.GetAxisRaw(MouseYAxisName);
 			}
 
-			AnyKeyDown = controls.OfType<Control>().Any(c => c.Down.HasFlag(ControlState.Either));
-			AnyKeyHeld = controls.OfType<Control>().Any(c => c.Held.HasFlag(ControlState.Either));
-			AnyKeyUp = controls.OfType<Control>().Any(c => c.Up.HasFlag(ControlState.Either));
+			foreach(var c in controls)
+				if((c.IsDebugControl && Debug.isDebugBuild) || c.IsDebugControl == false)
+					c.Update();
+
+			AnyControlDown = controls.OfType<Control>().Any(c => c.Down.HasFlag(ControlState.Either));
+			AnyControlHeld = controls.OfType<Control>().Any(c => c.Held.HasFlag(ControlState.Either));
+			AnyControlUp = controls.OfType<Control>().Any(c => c.Up.HasFlag(ControlState.Either));
 		}
 
 		/// <summary>

@@ -75,8 +75,9 @@ namespace BSGTools.IO.Xbox {
 			if(count < 2 || count > 4)
 				throw new ArgumentOutOfRangeException("count");
 			var xbc = new T[count];
-			for(byte i = 0;i < count;i++)
+			for(byte i = 0;i < count;i++) {
 				xbc[i] = (toClone as XboxControl<T>).CreateClone(i);
+			}
 			return xbc;
 		}
 
@@ -104,36 +105,27 @@ namespace BSGTools.IO.Xbox {
 
 		private bool reportedPosUp, reportedPosDown, reportedNegUp, reportedNegDown;
 
+
+		/// <summary>
+		/// Creates an XButtonControl for a single player game.
+		/// </summary>
+		/// <param name="positive">The positive binding. CANNOT BE XButton.None!</param>
 		public XButtonControl(XButton positive)
-			: base(0) {
-			this.Positive = positive;
+			: this(0, positive, XButton.None) {
 		}
 
+		/// <summary>
+		/// Creates an XButtonControl for a single player game.
+		/// </summary>
+		/// <param name="positive">The positive binding. CANNOT BE XButton.None!</param>
+		/// <param name="negative">The negative binding.</param>
 		public XButtonControl(XButton positive, XButton negative)
-			: this(positive) {
-			this.Negative = negative;
+			: this(0, positive, negative) {
 		}
 
-		/// <summary>
-		/// Creates a new XButtonControl.
-		/// </summary>
-		/// <param name="controllerIndex"><see cref="ControllerIndex"/></param>
-		/// <param name="positive"><see cref="Positive"/></param>
-		protected XButtonControl(byte controllerIndex, XButton positive)
+		private XButtonControl(byte controllerIndex, XButton positive, XButton negative)
 			: base(controllerIndex) {
-			if(positive == XButton.None)
-				throw new ArgumentException("Positive key cannot be 'XBinding.None'!");
 			this.Positive = positive;
-		}
-
-		/// <summary>
-		/// Creates a new XButtonControl.
-		/// </summary>
-		/// <param name="controllerIndex">The index of the controller that will manipulate this control's states and values.</param>
-		/// <param name="positive">The positive binding for this control. CANNOT BE XBinding.None!</param>
-		/// <param name="negative">The negative binding for this control.</param>
-		protected XButtonControl(byte controllerIndex, XButton positive, XButton negative)
-			: this(controllerIndex, positive) {
 			this.Negative = negative;
 		}
 
@@ -261,17 +253,15 @@ namespace BSGTools.IO.Xbox {
 		/// </value>
 		public InvertMode InversionMode { get; set; }
 
+		/// <summary>
+		/// Creates an XStickControl for a single player game.
+		/// </summary>
+		/// <param name="stick">The bound stick.</param>
 		public XStickControl(XStick stick)
-			: base(0) {
-			this.Stick = stick;
+			: this(0, stick) {
 		}
 
-		/// <summary>
-		/// Creates a new XStickControl.
-		/// </summary>
-		/// <param name="controllerIndex"><see cref="ControllerIndex"/></param>
-		/// <param name="stick"><see cref="Stick"/></param>
-		protected XStickControl(byte controllerIndex, XStick stick)
+		private XStickControl(byte controllerIndex, XStick stick)
 			: base(controllerIndex) {
 			this.Stick = stick;
 		}
@@ -335,21 +325,14 @@ namespace BSGTools.IO.Xbox {
 		public XTrigger Trigger { get; set; }
 
 		/// <summary>
-		/// Creates a new XTriggerControl.
+		/// Creates an XTriggerControl for a single player game.
 		/// </summary>
-		/// <param name="controllerIndex"><see cref="ControllerIndex"/></param>
-		/// <param name="trigger"><see cref="Trigger"/></param>
+		/// <param name="trigger">The bound trigger.</param>
 		public XTriggerControl(XTrigger trigger)
-			: base(0) {
-			this.Trigger = trigger;
+			: this(0, trigger) {
 		}
 
-		/// <summary>
-		/// Creates a new XTriggerControl.
-		/// </summary>
-		/// <param name="controllerIndex"><see cref="ControllerIndex"/></param>
-		/// <param name="trigger"><see cref="Trigger"/></param>
-		protected XTriggerControl(byte controllerIndex, XTrigger trigger)
+		private XTriggerControl(byte controllerIndex, XTrigger trigger)
 			: base(controllerIndex) {
 			this.Trigger = trigger;
 		}

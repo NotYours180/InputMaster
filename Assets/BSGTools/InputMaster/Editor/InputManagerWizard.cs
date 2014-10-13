@@ -16,13 +16,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 using BSGTools.IO.Xbox;
-using System.Reflection;
 #endif
 
 
