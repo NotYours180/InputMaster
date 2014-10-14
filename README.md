@@ -4,7 +4,7 @@
 
 A revolution of Input management for [Unity](http://unity3d.com/) designed for programmers, by a programmer.
 
-**Latest Version: v6.2.0b**
+**Latest Version: v6.3.0**
 
 Uses Semantic Versioning (Major.Minor.Fixes):
 
