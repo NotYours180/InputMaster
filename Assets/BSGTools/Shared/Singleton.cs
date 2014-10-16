@@ -13,10 +13,10 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-using System;
 using UnityEngine;
 
 namespace BSGTools.Structure {
+
 	/// <summary>
 	/// Based from: http://wiki.unity3d.com/index.php/Singleton
 	/// Be aware this will not prevent a non singleton constructor
@@ -28,6 +28,8 @@ namespace BSGTools.Structure {
 		private static T _instance;
 		private static object _lock = new object();
 
+		private static bool applicationIsQuitting = false;
+
 		/// <value>
 		/// Does singleton checking, then returns the instance of this class.
 		/// </value>
@@ -35,6 +37,18 @@ namespace BSGTools.Structure {
 			get {
 				return GetInstance();
 			}
+		}
+
+		/// <summary>
+		/// When Unity quits, it destroys objects in a random order.
+		/// In principle, a Singleton is only destroyed when application quits.
+		/// If any script calls Instance after it have been destroyed,
+		/// it will create a buggy ghost object that will stay on the Editor scene
+		/// even after stopping playing the Application.
+		/// So, this is to be sure that a ghost object is not created.
+		/// </summary>
+		public void OnDestroy() {
+			applicationIsQuitting = true;
 		}
 
 		private static T GetInstance() {
@@ -58,19 +72,6 @@ namespace BSGTools.Structure {
 				}
 				return _instance;
 			}
-		}
-
-		private static bool applicationIsQuitting = false;
-		/// <summary>
-		/// When Unity quits, it destroys objects in a random order.
-		/// In principle, a Singleton is only destroyed when application quits.
-		/// If any script calls Instance after it have been destroyed, 
-		/// it will create a buggy ghost object that will stay on the Editor scene 
-		/// even after stopping playing the Application.
-		/// So, this is to be sure that a ghost object is not created.
-		/// </summary>
-		public void OnDestroy() {
-			applicationIsQuitting = true;
 		}
 	}
 }

@@ -15,13 +15,54 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
+
 using XInputDotNetPure;
+
 #endif
+
 using System;
-using System.Diagnostics;
 using UnityEngine;
 
 namespace BSGTools.IO.Xbox {
+
+	/// <summary>
+	/// Represents all of the digital buttons of an Xbox 360 Controller.
+	/// </summary>
+	public enum XButton {
+		None,
+		A,
+		B,
+		X,
+		Y,
+		Back,
+		Guide,
+		Start,
+		StickLeft,
+		StickRight,
+		ShoulderLeft,
+		ShoulderRight,
+		DPadUp,
+		DPadDown,
+		DPadLeft,
+		DPadRight
+	}
+
+	/// <summary>
+	/// Represents the two analog sticks of an Xbox 360 Controller.
+	/// </summary>
+	public enum XStick {
+		StickLeft,
+		StickRight
+	}
+
+	/// <summary>
+	/// Represents the two triggers of an Xbox 360 Controller.
+	/// </summary>
+	public enum XTrigger {
+		TriggerLeft,
+		TriggerRight
+	}
+
 	/// <summary>
 	/// Used for type constraints.
 	/// Contains nor enforces any functionality.
@@ -34,6 +75,7 @@ namespace BSGTools.IO.Xbox {
 	/// <typeparam name="T">Used for generic self-creation.</typeparam>
 	[Serializable]
 	public abstract class XboxControl<T> : Control where T : IXboxControl {
+
 		/// <value>
 		/// The index of the controller that will manipulate this control's states and values.
 		/// This is used in conjunction to the PlayerIndex enumeration in XInput.
@@ -96,17 +138,17 @@ namespace BSGTools.IO.Xbox {
 	/// </summary>
 	[Serializable]
 	public sealed class XButtonControl : XboxControl<XButtonControl>, IXboxControl {
-		/// <value>
-		/// The positive binding for this control. CANNOT BE XBinding.None!
-		/// </value>
-		public XButton Positive { get; set; }
+		private bool reportedPosUp, reportedPosDown, reportedNegUp, reportedNegDown;
+
 		/// <value>
 		/// The negative binding for this control.
 		/// </value>
 		public XButton Negative { get; set; }
 
-		private bool reportedPosUp, reportedPosDown, reportedNegUp, reportedNegDown;
-
+		/// <value>
+		/// The positive binding for this control. CANNOT BE XBinding.None!
+		/// </value>
+		public XButton Positive { get; set; }
 
 		/// <summary>
 		/// Creates an XButtonControl for a single player game.
@@ -132,6 +174,23 @@ namespace BSGTools.IO.Xbox {
 		}
 
 		/// <summary>
+		/// Creates a clone of this XButtonControl.
+		/// </summary>
+		/// <param name="controller">The index of the controller that will manipulate this control's states and values.</param>
+		/// <returns>The cloned control.</returns>
+		protected override XButtonControl CreateClone(byte controller) {
+			return new XButtonControl(controller, this.Positive, this.Negative) {
+				Gravity = this.Gravity,
+				Sensitivity = this.Sensitivity,
+				Snap = this.Snap,
+				Invert = this.Invert,
+				Dead = this.Dead,
+				IsBlocked = this.IsBlocked,
+				Name = this.Name
+			};
+		}
+
+		/// <summary>
 		/// Updates this control's states.
 		/// </summary>
 		protected override void UpdateStates() {
@@ -143,10 +202,8 @@ namespace BSGTools.IO.Xbox {
 			var positivePressed = false;
 			var negativePressed = false;
 
-
 			positivePressed = XBindingVal(pos, gpState);
 			negativePressed = XBindingVal(neg, gpState);
-
 
 			if(positivePressed) {
 				Held |= ControlState.Positive;
@@ -161,7 +218,6 @@ namespace BSGTools.IO.Xbox {
 				reportedPosUp = true;
 				reportedPosDown = false;
 			}
-
 
 			if(negativePressed) {
 				Held |= ControlState.Negative;
@@ -180,6 +236,7 @@ namespace BSGTools.IO.Xbox {
 		}
 
 #if XBOX_ALLOWED
+
 		/// <summary>
 		/// An internal method of translating from XButton to it's logical state.
 		/// </summary>
@@ -190,58 +247,58 @@ namespace BSGTools.IO.Xbox {
 			switch(xb) {
 				case XButton.None:
 					return false;
+
 				case XButton.A:
 					return (state.Buttons.A == ButtonState.Pressed);
+
 				case XButton.B:
 					return (state.Buttons.B == ButtonState.Pressed);
+
 				case XButton.X:
 					return (state.Buttons.X == ButtonState.Pressed);
+
 				case XButton.Y:
 					return (state.Buttons.Y == ButtonState.Pressed);
+
 				case XButton.Back:
 					return (state.Buttons.Back == ButtonState.Pressed);
+
 				case XButton.Guide:
 					return (state.Buttons.Guide == ButtonState.Pressed);
+
 				case XButton.Start:
 					return (state.Buttons.Start == ButtonState.Pressed);
+
 				case XButton.StickLeft:
 					return (state.Buttons.LeftStick == ButtonState.Pressed);
+
 				case XButton.StickRight:
 					return (state.Buttons.RightStick == ButtonState.Pressed);
+
 				case XButton.ShoulderLeft:
 					return (state.Buttons.LeftShoulder == ButtonState.Pressed);
+
 				case XButton.ShoulderRight:
 					return (state.Buttons.RightShoulder == ButtonState.Pressed);
+
 				case XButton.DPadUp:
 					return (state.DPad.Up == ButtonState.Pressed);
+
 				case XButton.DPadDown:
 					return (state.DPad.Down == ButtonState.Pressed);
+
 				case XButton.DPadLeft:
 					return (state.DPad.Left == ButtonState.Pressed);
+
 				case XButton.DPadRight:
 					return (state.DPad.Right == ButtonState.Pressed);
+
 				default:
 					throw new ArgumentException("", "xb");
 			}
 		}
-#endif
 
-		/// <summary>
-		/// Creates a clone of this XButtonControl.
-		/// </summary>
-		/// <param name="controller">The index of the controller that will manipulate this control's states and values.</param>
-		/// <returns>The cloned control.</returns>
-		protected override XButtonControl CreateClone(byte controller) {
-			return new XButtonControl(controller, this.Positive, this.Negative) {
-				Gravity = this.Gravity,
-				Sensitivity = this.Sensitivity,
-				Snap = this.Snap,
-				Invert = this.Invert,
-				Dead = this.Dead,
-				IsBlocked = this.IsBlocked,
-				Name = this.Name
-			};
-		}
+#endif
 	}
 
 	/// <summary>
@@ -249,6 +306,12 @@ namespace BSGTools.IO.Xbox {
 	/// </summary>
 	[Serializable]
 	public sealed class XStickControl : XboxControl<XStickControl>, IXboxControl {
+
+		/// <value>
+		/// How inversion should be applied to this control.
+		/// </value>
+		public InvertMode InversionMode { get; set; }
+
 		/// <value>
 		/// The assigned analog stick.
 		/// </value>
@@ -258,10 +321,6 @@ namespace BSGTools.IO.Xbox {
 		/// The X/Y axis values for this control.
 		/// </value>
 		public Vector2 StickValue { get; private set; }
-		/// <value>
-		/// How inversion should be applied to this control.
-		/// </value>
-		public InvertMode InversionMode { get; set; }
 
 		/// <summary>
 		/// Creates an XStickControl for a single player game.
@@ -277,10 +336,26 @@ namespace BSGTools.IO.Xbox {
 		}
 
 		/// <summary>
+		/// Creates a clone of this XStickControl.
+		/// </summary>
+		/// <param name="controller">The <see cref="ControllerIndex"/> to assign to the new clone.</param>
+		/// <returns>The cloned XStickControl.</returns>
+		protected override XStickControl CreateClone(byte controller) {
+			return new XStickControl(controller, this.Stick) {
+				Gravity = this.Gravity,
+				Sensitivity = this.Sensitivity,
+				Snap = this.Snap,
+				Invert = this.Invert,
+				Dead = this.Dead,
+				IsBlocked = this.IsBlocked,
+				Name = this.Name
+			};
+		}
+
+		/// <summary>
 		/// States are not used for stick controls.
 		/// </summary>
 		protected override void UpdateStates() {
-
 		}
 
 		/// <summary>
@@ -304,23 +379,6 @@ namespace BSGTools.IO.Xbox {
 		}
 
 		/// <summary>
-		/// Creates a clone of this XStickControl.
-		/// </summary>
-		/// <param name="controller">The <see cref="ControllerIndex"/> to assign to the new clone.</param>
-		/// <returns>The cloned XStickControl.</returns>
-		protected override XStickControl CreateClone(byte controller) {
-			return new XStickControl(controller, this.Stick) {
-				Gravity = this.Gravity,
-				Sensitivity = this.Sensitivity,
-				Snap = this.Snap,
-				Invert = this.Invert,
-				Dead = this.Dead,
-				IsBlocked = this.IsBlocked,
-				Name = this.Name
-			};
-		}
-
-		/// <summary>
 		/// Because there are 2 axes to worry about, a specialized enumeration is used to allow for different inversion modes.
 		/// </summary>
 		[Flags]
@@ -335,6 +393,7 @@ namespace BSGTools.IO.Xbox {
 	/// </summary>
 	[Serializable]
 	public sealed class XTriggerControl : XboxControl<XTriggerControl>, IXboxControl {
+
 		/// <value>
 		/// The assigend trigger that will manipulate this control's states and values.
 		/// </value>
@@ -351,6 +410,23 @@ namespace BSGTools.IO.Xbox {
 		private XTriggerControl(byte controllerIndex, XTrigger trigger)
 			: base(controllerIndex) {
 			this.Trigger = trigger;
+		}
+
+		/// <summary>
+		/// Creates a clone of this XTriggerControl.
+		/// </summary>
+		/// <param name="controller">The <see cref="ControllerIndex"/> to assign to the new clone.</param>
+		/// <returns>The cloned XTriggerControl.</returns>
+		protected override XTriggerControl CreateClone(byte controller) {
+			return new XTriggerControl(controller, this.Trigger) {
+				Gravity = this.Gravity,
+				Sensitivity = this.Sensitivity,
+				Snap = this.Snap,
+				Invert = this.Invert,
+				Dead = this.Dead,
+				IsBlocked = this.IsBlocked,
+				Name = this.Name
+			};
 		}
 
 		/// <summary>
@@ -371,7 +447,7 @@ namespace BSGTools.IO.Xbox {
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <see cref="UpdateStates"/>
 		protected override void UpdateValues() {
@@ -386,60 +462,5 @@ namespace BSGTools.IO.Xbox {
 			Reset();
 #endif
 		}
-
-		/// <summary>
-		/// Creates a clone of this XTriggerControl.
-		/// </summary>
-		/// <param name="controller">The <see cref="ControllerIndex"/> to assign to the new clone.</param>
-		/// <returns>The cloned XTriggerControl.</returns>
-		protected override XTriggerControl CreateClone(byte controller) {
-			return new XTriggerControl(controller, this.Trigger) {
-				Gravity = this.Gravity,
-				Sensitivity = this.Sensitivity,
-				Snap = this.Snap,
-				Invert = this.Invert,
-				Dead = this.Dead,
-				IsBlocked = this.IsBlocked,
-				Name = this.Name
-			};
-		}
-	}
-
-	/// <summary>
-	/// Represents the two analog sticks of an Xbox 360 Controller.
-	/// </summary>
-	public enum XStick {
-		StickLeft,
-		StickRight
-	}
-
-	/// <summary>
-	/// Represents the two triggers of an Xbox 360 Controller.
-	/// </summary>
-	public enum XTrigger {
-		TriggerLeft,
-		TriggerRight
-	}
-
-	/// <summary>
-	/// Represents all of the digital buttons of an Xbox 360 Controller.
-	/// </summary>
-	public enum XButton {
-		None,
-		A,
-		B,
-		X,
-		Y,
-		Back,
-		Guide,
-		Start,
-		StickLeft,
-		StickRight,
-		ShoulderLeft,
-		ShoulderRight,
-		DPadUp,
-		DPadDown,
-		DPadLeft,
-		DPadRight
 	}
 }

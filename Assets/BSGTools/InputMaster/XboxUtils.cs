@@ -15,10 +15,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
+
 using XInputDotNetPure;
+
 #endif
 
 namespace BSGTools.IO.Xbox {
+
 	/// <summary>
 	/// A static utility class for minimal required updates for <see cref="XboxControl"/>s.
 	/// </summary>
@@ -26,26 +29,28 @@ namespace BSGTools.IO.Xbox {
 #if XBOX_ALLOWED
 		public const int MAX_CONTROLLER_COUNT = 4;
 
-		private static GamePadState[] _controllerStates = new GamePadState[MAX_CONTROLLER_COUNT];
-		/// <value>
-		/// The latest states of each controller.
-		/// </value>
-		public static GamePadState[] ControllerStates { get { return _controllerStates; } }
-
 		private static GamePadDeadZone[] _controllerDeadZones = new GamePadDeadZone[MAX_CONTROLLER_COUNT];
+		private static GamePadState[] _controllerStates = new GamePadState[MAX_CONTROLLER_COUNT];
+
 		/// <value>
 		/// The current deadzone settings for each controller.
 		/// </value>
 		public static GamePadDeadZone[] ControllerDeadZones { get { return _controllerDeadZones; } }
 
 		/// <value>
-		/// If true, vibration will automatically stop when the application is paused.
+		/// The latest states of each controller.
 		/// </value>
-		public static bool StopVibrateOnAppPause { get; set; }
+		public static GamePadState[] ControllerStates { get { return _controllerStates; } }
+
 		/// <value>
 		/// If true, vibration will automatically stop when the application has lost focus.
 		/// </value>
 		public static bool StopVibrateOnAppFocusLost { get; set; }
+
+		/// <value>
+		/// If true, vibration will automatically stop when the application is paused.
+		/// </value>
+		public static bool StopVibrateOnAppPause { get; set; }
 
 		static XboxUtils() {
 			StopVibrateOnAppFocusLost = true;
@@ -53,13 +58,24 @@ namespace BSGTools.IO.Xbox {
 		}
 
 		/// <summary>
-		/// Called by <see cref="InputMaster"/> to update the state of each controller.
+		/// Check if an individual controller is enabled.
 		/// </summary>
-		internal static void UpdateStates() {
-			for(int i = 0;i < MAX_CONTROLLER_COUNT;i++) {
-				var pi = (PlayerIndex)i;
-				ControllerStates[i] = GamePad.GetState(pi, ControllerDeadZones[i]);
-			}
+		public static bool IsConnected(int controller) {
+			return ControllerStates[controller].IsConnected;
+		}
+
+		/// <summary>
+		/// Turn on vibration for both motors for a single controller.
+		/// </summary>
+		public static void SetVibration(int controller, float lrVib) {
+			SetVibration(controller, lrVib, lrVib);
+		}
+
+		/// <summary>
+		/// Turn on individual motor vibration for a single controller.
+		/// </summary>
+		public static void SetVibration(int controller, float lVib, float rVib) {
+			GamePad.SetVibration((PlayerIndex)controller, lVib, rVib);
 		}
 
 		/// <summary>
@@ -79,27 +95,15 @@ namespace BSGTools.IO.Xbox {
 		}
 
 		/// <summary>
-		/// Turn on vibration for both motors for a single controller.
+		/// Called by <see cref="InputMaster"/> to update the state of each controller.
 		/// </summary>
-		public static void SetVibration(int controller, float lrVib) {
-			SetVibration(controller, lrVib, lrVib);
+		internal static void UpdateStates() {
+			for(int i = 0;i < MAX_CONTROLLER_COUNT;i++) {
+				var pi = (PlayerIndex)i;
+				ControllerStates[i] = GamePad.GetState(pi, ControllerDeadZones[i]);
+			}
 		}
 
-
-		/// <summary>
-		/// Turn on individual motor vibration for a single controller.
-		/// </summary>
-		public static void SetVibration(int controller, float lVib, float rVib) {
-			GamePad.SetVibration((PlayerIndex)controller, lVib, rVib);
-		}
-
-
-		/// <summary>
-		/// Check if an individual controller is enabled.
-		/// </summary>
-		public static bool IsConnected(int controller) {
-			return ControllerStates[controller].IsConnected;
-		}
 #endif
 	}
 }

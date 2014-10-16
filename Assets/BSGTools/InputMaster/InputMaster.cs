@@ -17,18 +17,22 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define XBOX_ALLOWED
 #endif
 
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using System.Reflection;
 using BSGTools.IO.Xbox;
+using UnityEngine;
 
 namespace BSGTools.IO {
+
 	/// <summary>
 	/// Simple extensions class for commonly used enum functionality.
 	/// </summary>
 	public static class EnumExt {
+
+		#region Methods
+
 		/// <summary>
 		/// Similar to .NET 4.0+'s method to check if a flag is set on an enum.
 		/// </summary>
@@ -38,6 +42,8 @@ namespace BSGTools.IO {
 		public static bool HasFlag(this Enum value, Enum flag) {
 			return (Convert.ToInt64(value) & Convert.ToInt64(flag)) != 0;
 		}
+
+		#endregion Methods
 	}
 
 	/// <summary>
@@ -46,120 +52,78 @@ namespace BSGTools.IO {
 	/// </summary>
 	[DisallowMultipleComponent]
 	public class InputMaster : MonoBehaviour {
+
+		#region Fields
+
 		private List<Control> controls = new List<Control>();
+
+		#endregion Fields
+
+		#region Properties
 
 		/// <value>
 		/// Are any controls in an active Down state?
 		/// </value>
 		public bool AnyControlDown { get; private set; }
+
 		/// <value>
 		/// Are any controls in an active Held state?
 		/// </value>
 		public bool AnyControlHeld { get; private set; }
+
 		/// <value>
 		/// Are any controls in an active Up state?
 		/// </value>
 		public bool AnyControlUp { get; private set; }
 
 		/// <value>
-		/// The Mouse X Axis axis name in Unity's Input Manager
+		/// The MouseWheel Axis axis value from Unity's native Input system.
 		/// </value>
-		public string MouseXAxisName { get; set; }
+		public float MouseWheel { get; private set; }
+
 		/// <value>
-		/// The Mouse Y Axis axis name in Unity's Input Manager
+		/// The MouseWheel Axis axis name in Unity's Input Manager
 		/// </value>
-		public string MouseYAxisName { get; set; }
+		public string MouseWheelAxisName { get; set; }
+
+		/// <value>
+		/// The MouseWheel Axis raw axis value from Unity's native Input system.
+		/// </value>
+		public float MouseWheelRaw { get; private set; }
 
 		/// <value>
 		/// The Mouse X Axis axis value from Unity's native Input system.
 		/// </value>
 		public float MouseX { get; private set; }
+
+		/// <value>
+		/// The Mouse X Axis axis name in Unity's Input Manager
+		/// </value>
+		public string MouseXAxisName { get; set; }
+
+		/// <value>
+		/// The Mouse X Axis raw axis value from Unity's native Input system.
+		/// </value>
+		public float MouseXRaw { get; private set; }
+
 		/// <value>
 		/// The Mouse Y Axis axis value from Unity's native Input system.
 		/// </value>
 		public float MouseY { get; private set; }
 
 		/// <value>
-		/// The Mouse X Axis raw axis value from Unity's native Input system.
+		/// The Mouse Y Axis axis name in Unity's Input Manager
 		/// </value>
-		public float MouseXRaw { get; private set; }
+		public string MouseYAxisName { get; set; }
+
 		/// <value>
 		/// The Mouse Y Axis raw axis value from Unity's native Input system.
 		/// </value>
 		public float MouseYRaw { get; private set; }
 
-		void Update() {
-#if XBOX_ALLOWED
-			XboxUtils.UpdateStates();
-#endif
+		#endregion Properties
 
-			if(string.IsNullOrEmpty(MouseXAxisName.Trim()) == false) {
-				MouseX = Input.GetAxis(MouseXAxisName);
-				MouseXRaw = Input.GetAxisRaw(MouseXAxisName);
-			}
-			if(string.IsNullOrEmpty(MouseYAxisName.Trim()) == false) {
-				MouseY = Input.GetAxis(MouseYAxisName);
-				MouseYRaw = Input.GetAxisRaw(MouseYAxisName);
-			}
-
-			foreach(var c in controls)
-				if((c.IsDebugControl && Debug.isDebugBuild) || c.IsDebugControl == false)
-					c.Update();
-
-			AnyControlDown = controls.OfType<Control>().Any(c => c.Down.HasFlag(ControlState.Either));
-			AnyControlHeld = controls.OfType<Control>().Any(c => c.Held.HasFlag(ControlState.Either));
-			AnyControlUp = controls.OfType<Control>().Any(c => c.Up.HasFlag(ControlState.Either));
-		}
-
-		/// <summary>
-		/// Resets all states/values on all controls.
-		/// </summary>
-		/// <seealso cref="ResetAll(bool)"/>
-		public void ResetAll() {
-			foreach(var c in controls)
-				c.Reset();
-		}
-
-		/// <summary>
-		/// Blocks or unblocks all controls.
-		/// This has the side effect of resetting all control states.
-		/// </summary>
-		/// <param name="blocked">To block/unblock.</param>
-		/// <seealso cref="Control.IsBlocked"/>
-		public void SetBlockAll(bool blocked) {
-			foreach(var c in controls)
-				c.IsBlocked = blocked;
-		}
-
-		/// <summary>
-		/// Internally used to get all <see cref="Control"/> variables using reflection from a class instance.
-		/// Not the most performance efficient method of supplying InputMaster with controls.
-		/// </summary>
-		/// <param name="controlClass">The instance of a class to get the controls from.</param>
-		/// <returns>An array of all Control objects.</returns>
-		private static Control[] GetAllControls(object controlClass) {
-			var type = controlClass.GetType();
-
-			var bf = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
-
-			var properties = type.GetProperties(bf).Where(p => p.GetValue(controlClass, null) != null).Select(p => p.GetValue(controlClass, null));
-			var fields = type.GetFields(bf).Where(f => f.GetValue(controlClass) != null).Select(f => f.GetValue(controlClass));
-
-			var p_bare = properties.OfType<Control>();
-			var p_enum = properties.OfType<IEnumerable<Control>>();
-			var f_bare = fields.OfType<Control>();
-			var f_enum = fields.OfType<IEnumerable<Control>>();
-
-			var final = p_bare.Concat(f_bare);
-
-
-			foreach(var p_array in p_enum)
-				final = final.Concat(p_array);
-			foreach(var f_array in f_enum)
-				final = final.Concat(f_array);
-
-			return final.ToArray();
-		}
+		#region Methods
 
 		/// <summary>
 		/// Uses reflection to get all controls in a class.
@@ -193,6 +157,26 @@ namespace BSGTools.IO {
 		}
 
 		/// <summary>
+		/// Resets all states/values on all controls.
+		/// </summary>
+		/// <seealso cref="ResetAll(bool)"/>
+		public void ResetAll() {
+			foreach(var c in controls)
+				c.Reset();
+		}
+
+		/// <summary>
+		/// Blocks or unblocks all controls.
+		/// This has the side effect of resetting all control states.
+		/// </summary>
+		/// <param name="blocked">To block/unblock.</param>
+		/// <seealso cref="Control.IsBlocked"/>
+		public void SetBlockAll(bool blocked) {
+			foreach(var c in controls)
+				c.IsBlocked = blocked;
+		}
+
+		/// <summary>
 		/// Searches the control list for the provided Control objects
 		/// and replaces them with said provided object
 		/// </summary>
@@ -206,22 +190,89 @@ namespace BSGTools.IO {
 			}
 		}
 
-		#region XboxUtils
+		/// <summary>
+		/// Internally used to get all <see cref="Control"/> variables using reflection from a class instance.
+		/// Not the most performance efficient method of supplying InputMaster with controls.
+		/// </summary>
+		/// <param name="controlClass">The instance of a class to get the controls from.</param>
+		/// <returns>An array of all Control objects.</returns>
+		private static Control[] GetAllControls(object controlClass) {
+			var type = controlClass.GetType();
+
+			var bf = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+
+			var properties = type.GetProperties(bf).Where(p => p.GetValue(controlClass, null) != null).Select(p => p.GetValue(controlClass, null));
+			var fields = type.GetFields(bf).Where(f => f.GetValue(controlClass) != null).Select(f => f.GetValue(controlClass));
+
+			var p_bare = properties.OfType<Control>();
+			var p_enum = properties.OfType<IEnumerable<Control>>();
+			var f_bare = fields.OfType<Control>();
+			var f_enum = fields.OfType<IEnumerable<Control>>();
+
+			var final = p_bare.Concat(f_bare);
+
+			foreach(var p_array in p_enum)
+				final = final.Concat(p_array);
+			foreach(var f_array in f_enum)
+				final = final.Concat(f_array);
+
+			return final.ToArray();
+		}
+
 #if XBOX_ALLOWED
-		void OnApplicationPause(bool paused) {
+
+		private void OnApplicationFocus(bool focused) {
+			if(XboxUtils.StopVibrateOnAppFocusLost && focused == false)
+				XboxUtils.SetVibrationAll(0f);
+		}
+
+		private void OnApplicationPause(bool paused) {
 			if(XboxUtils.StopVibrateOnAppPause && paused == true)
 				XboxUtils.SetVibrationAll(0f);
 		}
 
-		void OnApplicationQuit() {
+		private void OnApplicationQuit() {
 			XboxUtils.SetVibrationAll(0f);
 		}
 
-		void OnApplicationFocus(bool focused) {
-			if(XboxUtils.StopVibrateOnAppFocusLost && focused == false)
-				XboxUtils.SetVibrationAll(0f);
-		}
 #endif
-		#endregion
+
+		private void Update() {
+#if XBOX_ALLOWED
+			XboxUtils.UpdateStates();
+#endif
+
+			if(string.IsNullOrEmpty(MouseXAxisName) == false) {
+				MouseX = Input.GetAxis(MouseXAxisName);
+				MouseXRaw = Input.GetAxisRaw(MouseXAxisName);
+			}
+			if(string.IsNullOrEmpty(MouseYAxisName) == false) {
+				MouseY = Input.GetAxis(MouseYAxisName);
+				MouseYRaw = Input.GetAxisRaw(MouseYAxisName);
+			}
+			if(string.IsNullOrEmpty(MouseWheelAxisName) == false) {
+				MouseWheel = Input.GetAxis(MouseWheelAxisName);
+				MouseWheelRaw = Input.GetAxisRaw(MouseWheelAxisName);
+			}
+
+			AnyControlDown = false;
+			AnyControlHeld = false;
+			AnyControlUp = false;
+
+			foreach(var c in controls) {
+				if((c.IsDebugControl && Debug.isDebugBuild) || c.IsDebugControl == false) {
+					c.Update();
+
+					if(c.Down.HasFlag(ControlState.Either))
+						AnyControlDown = true;
+					if(c.Held.HasFlag(ControlState.Either))
+						AnyControlHeld = true;
+					if(c.Up.HasFlag(ControlState.Either))
+						AnyControlUp = true;
+				}
+			}
+		}
+
+		#endregion Methods
 	}
 }

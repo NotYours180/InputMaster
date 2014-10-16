@@ -18,6 +18,21 @@ using System.Text;
 using UnityEngine;
 
 namespace BSGTools.IO {
+
+	/// <summary>
+	/// Describes the current state of a control's specific state.
+	/// Use (control.Down/Held/Up & flag) != 0 for Positive & Negative.
+	/// Use == for Neither, Both, and Either.
+	/// </summary>
+	[Flags]
+	public enum ControlState {
+		Positive = 1 << 0,
+		Negative = 1 << 1,
+		Neither = Positive & Negative,
+		Both = Positive | Negative,
+		Either = Positive ^ Negative
+	}
+
 	/// <summary>
 	/// Provided to give a common base class and common functionality for <see cref="KeyControl"/> and <see cref="XboxControl"/>.
 	/// <para />
@@ -36,10 +51,60 @@ namespace BSGTools.IO {
 	/// </code>
 	[Serializable]
 	public abstract class Control {
+
 		/// <value>
-		/// Can be used as a display name or for string metadata.
+		/// The current "down" state of the control.
 		/// </value>
-		public string Name { get; set; }
+		public ControlState Down { get; set; }
+
+		/// <value>
+		/// The current "held" state of the control.
+		/// </value>
+		public ControlState Held { get; set; }
+
+		/// <value>
+		/// The current "up" state of the control.
+		/// </value>
+		public ControlState Up { get; set; }
+
+		/// <value>
+		/// Functionally identical to the Dead property of Unity's native Input system.
+		/// The absolute value of a control's real value reports as 0 if it's less than this value.
+		/// </value>
+		public float Dead { get; set; }
+
+		/// <value>
+		/// Functionally identical to the Gravity property of Unity's native Input system.
+		/// Speed per second that a control at rest returns to 0.
+		/// </value>
+		public float Gravity { get; set; }
+
+		/// <value>
+		/// Functionally identical to the Sensitivity property of Unity's native Input system.
+		/// Speed per second that a control in motion approaches 1.
+		/// </value>
+		public float Sensitivity { get; set; }
+
+		/// <value>
+		/// Returns an analog representation of the current real value.
+		/// This is functionally identical to calling Input.GetAxis() from Unity's native Input system.
+		/// </value>
+		public float Value { get; protected set; }
+
+		/// <value>
+		/// Returns a digital, ceiling-rounded representation of <see cref="Value"/>.
+		/// This is functionally identical to calling Input.GetAxisRaw() from Unity's native Input system.
+		/// </value>
+		public sbyte FixedValue { get; protected set; }
+
+		/// <value>
+		/// Functionally identical to the Invert property of Unity's native Input system.
+		/// If true, the contol's value will report as -(value).
+		/// However, the state of the control will remain the same (positive down will still report as positive down, etc).
+		/// Keep in mind that this functions whether or not a negative binding is supplied.
+		/// </value>
+		public bool Invert { get; set; }
+
 		/// <value>
 		/// This is used to block any control from receiving updates.
 		/// Keep in mind that if you block a control, it maintains its values from it's most recent update.
@@ -53,46 +118,17 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool IsDebugControl { get; set; }
 
-		#region Configuration
 		/// <value>
-		/// Functionally identical to the Gravity property of Unity's native Input system.
-		/// Speed per second that a control at rest returns to 0.
+		/// Can be used as a display name or for string metadata.
 		/// </value>
-		public float Gravity { get; set; }
-		/// <value>
-		/// Functionally identical to the Sensitivity property of Unity's native Input system.
-		/// Speed per second that a control in motion approaches 1.
-		/// </value>
-		public float Sensitivity { get; set; }
-		/// <value>
-		/// Functionally identical to the Dead property of Unity's native Input system.
-		/// The absolute value of a control's real value reports as 0 if it's less than this value.
-		/// </value>
-		public float Dead { get; set; }
+		public string Name { get; set; }
+
 		/// <value>
 		/// Functionally identical to the Snap property of Unity's native Input system.
 		/// If true, and if the control has a positive and negative binding, the control's value will snap to 0 if provided an opposite input.
 		/// </value>
 		public bool Snap { get; set; }
-		/// <value>
-		/// Functionally identical to the Invert property of Unity's native Input system.
-		/// If true, the contol's value will report as -(value).
-		/// However, the state of the control will remain the same (positive down will still report as positive down, etc).
-		/// Keep in mind that this functions whether or not a negative binding is supplied.
-		/// </value>
-		public bool Invert { get; set; }
-		#endregion
 
-		/// <value>
-		/// Returns a digital, ceiling-rounded representation of <see cref="Value"/>.
-		/// This is functionally identical to calling Input.GetAxisRaw() from Unity's native Input system.
-		/// </value>
-		public sbyte FixedValue { get; protected set; }
-		/// <value>
-		/// Returns an analog representation of the current real value.
-		/// This is functionally identical to calling Input.GetAxis() from Unity's native Input system.
-		/// </value>
-		public float Value { get; protected set; }
 		/// <value>
 		/// An internally used property that keeps track of the "real value" across updates.
 		/// This is necessary so that properties like <see cref="Dead"/> can be applied to the final value.
@@ -100,21 +136,6 @@ namespace BSGTools.IO {
 		/// This value is not necessary to use for input.
 		/// </value>
 		protected float RealValue { get; set; }
-
-		#region States
-		/// <value>
-		/// The current "down" state of the control.
-		/// </value>
-		public ControlState Down { get; set; }
-		/// <value>
-		/// The current "up" state of the control.
-		/// </value>
-		public ControlState Up { get; set; }
-		/// <value>
-		/// The current "held" state of the control.
-		/// </value>
-		public ControlState Held { get; set; }
-		#endregion
 
 		protected Control() {
 			Sensitivity = 1f;
@@ -126,11 +147,89 @@ namespace BSGTools.IO {
 		}
 
 		/// <summary>
-		/// Internally used to give a random name to a control if one is not provided.
+		/// Adds the <see cref="Value"/> properties of a variable amount of controls.
+		/// The return value is clamped between -1...1
+		/// If you have multiple control options for a single in-game action,
+		/// this is how you gather the final input value for the action.
 		/// </summary>
-		/// <returns>A new random string.</returns>
-		private static string GetRandomName() {
-			return "UNNAMED_" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+		/// <param name="one">The first control.</param>
+		/// <param name="two">The second control.</param>
+		/// <returns>The clamped sum of the control values.</returns>
+		public static float operator +(Control one, Control two) {
+			return Mathf.Clamp(one.Value + two.Value, -1f, 1f);
+		}
+
+		/// <summary>
+		/// Adds the <see cref="Value"/> properties of a variable amount of controls and floats.
+		/// The return value is clamped between -1...1
+		/// This has the same use-case as +(Control, Control), except this is useful
+		/// for when adding certain Xbox Controls like XTrigger and XStick,
+		/// which do not use the Value property of Control.
+		/// </summary>
+		/// <param name="one">The first control.</param>
+		/// <param name="val">A float value.</param>
+		/// <returns>The clamped sum of the control value and the provided float argument.</returns>
+		public static float operator +(Control one, float val) {
+			return Mathf.Clamp(one.Value + val, -1f, 1f);
+		}
+
+		/// <summary>
+		/// Reset all non-configuration values and states for this control.
+		/// </summary>
+		/// <seealso cref="Reset(bool)"/>
+		public void Reset() {
+			Down = ControlState.Neither;
+			Up = ControlState.Neither;
+			Held = ControlState.Neither;
+			FixedValue = 0;
+			Value = 0f;
+			RealValue = 0f;
+		}
+
+		/// <summary>
+		/// Reset all non-configuration values for this control. This is the best method to use for cutscenes.
+		/// </summary>
+		/// <param name="block">Whether or not to block this input after resetting.</param>
+		/// <seealso cref="Reset"/>
+		///	<seealso cref="IsBlocked"/>
+		public void Reset(bool block) {
+			Reset();
+			IsBlocked = block;
+		}
+
+		/// <summary>
+		/// Returns debug information in a single line.
+		/// </summary>
+		/// <returns>The debug information.</returns>
+		public override string ToString() {
+			return ToStringBlock().Replace(Environment.NewLine, " ");
+		}
+
+		/// <summary>
+		/// Returns debug information as a formatted string block.
+		/// </summary>
+		/// <returns>The debug information.</returns>
+		public virtual string ToStringBlock() {
+			var sb = new StringBuilder();
+
+			sb.AppendLine(Name);
+			sb.AppendLine(string.Format("D: {0}", Down));
+			sb.AppendLine(string.Format("H: {0}", Held));
+			sb.AppendLine(string.Format("U: {0}", Up));
+
+			sb.AppendLine(string.Format("RV: {0}", RealValue));
+			sb.AppendLine(string.Format("FV: {0}", FixedValue));
+			sb.AppendLine(string.Format("V: {0}", Value));
+
+			sb.AppendLine(string.Format("B: {0}", IsBlocked));
+			sb.AppendLine(string.Format("I: {0}", Invert));
+			sb.AppendLine(string.Format("Sn: {0}", Snap));
+
+			sb.AppendLine(string.Format("G: {0}", Gravity));
+			sb.AppendLine(string.Format("Se: {0}", Sensitivity));
+			sb.AppendLine(string.Format("D: {0}", Dead));
+
+			return sb.ToString().Trim();
 		}
 
 		/// <summary>
@@ -143,6 +242,15 @@ namespace BSGTools.IO {
 			if(IsBlocked == false)
 				UpdateStates();
 			UpdateValues();
+		}
+
+		/// <summary>
+		/// Internally used for maintaining the <see cref="RealValue"/> inbetween updates while resetting everything else.
+		/// </summary>
+		protected void SoftReset() {
+			var realVal = RealValue;
+			Reset();
+			RealValue = realVal;
 		}
 
 		/// <summary>
@@ -192,114 +300,12 @@ namespace BSGTools.IO {
 		}
 
 		/// <summary>
-		/// Reset all non-configuration values and states for this control.
+		/// Internally used to give a random name to a control if one is not provided.
 		/// </summary>
-		/// <seealso cref="Reset(bool)"/>
-		public void Reset() {
-			Down = ControlState.Neither;
-			Up = ControlState.Neither;
-			Held = ControlState.Neither;
-			FixedValue = 0;
-			Value = 0f;
-			RealValue = 0f;
+		/// <returns>A new random string.</returns>
+		private static string GetRandomName() {
+			return "UNNAMED_" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 		}
-
-		/// <summary>
-		/// Reset all non-configuration values for this control. This is the best method to use for cutscenes.
-		/// </summary>
-		/// <param name="block">Whether or not to block this input after resetting.</param>
-		/// <seealso cref="Reset"/>
-		///	<seealso cref="IsBlocked"/>
-		public void Reset(bool block) {
-			Reset();
-			IsBlocked = block;
-		}
-
-		/// <summary>
-		/// Internally used for maintaining the <see cref="RealValue"/> inbetween updates while resetting everything else.
-		/// </summary>
-		protected void SoftReset() {
-			var realVal = RealValue;
-			Reset();
-			RealValue = realVal;
-		}
-
-		/// <summary>
-		/// Returns debug information in a single line.
-		/// </summary>
-		/// <returns>The debug information.</returns>
-		public override string ToString() {
-			return ToStringBlock().Replace(Environment.NewLine, " ");
-		}
-
-		/// <summary>
-		/// Returns debug information as a formatted string block.
-		/// </summary>
-		/// <returns>The debug information.</returns>
-		public virtual string ToStringBlock() {
-			var sb = new StringBuilder();
-
-			sb.AppendLine(Name);
-			sb.AppendLine(string.Format("D: {0}", Down));
-			sb.AppendLine(string.Format("H: {0}", Held));
-			sb.AppendLine(string.Format("U: {0}", Up));
-
-			sb.AppendLine(string.Format("RV: {0}", RealValue));
-			sb.AppendLine(string.Format("FV: {0}", FixedValue));
-			sb.AppendLine(string.Format("V: {0}", Value));
-
-			sb.AppendLine(string.Format("B: {0}", IsBlocked));
-			sb.AppendLine(string.Format("I: {0}", Invert));
-			sb.AppendLine(string.Format("Sn: {0}", Snap));
-
-			sb.AppendLine(string.Format("G: {0}", Gravity));
-			sb.AppendLine(string.Format("Se: {0}", Sensitivity));
-			sb.AppendLine(string.Format("D: {0}", Dead));
-
-
-			return sb.ToString().Trim();
-		}
-
-		/// <summary>
-		/// Adds the <see cref="Value"/> properties of a variable amount of controls.
-		/// The return value is clamped between -1...1
-		/// If you have multiple control options for a single in-game action,
-		/// this is how you gather the final input value for the action.
-		/// </summary>
-		/// <param name="one">The first control.</param>
-		/// <param name="two">The second control.</param>
-		/// <returns>The clamped sum of the control values.</returns>
-		public static float operator +(Control one, Control two) {
-			return Mathf.Clamp(one.Value + two.Value, -1f, 1f);
-		}
-
-		/// <summary>
-		/// Adds the <see cref="Value"/> properties of a variable amount of controls and floats.
-		/// The return value is clamped between -1...1
-		/// This has the same use-case as +(Control, Control), except this is useful
-		/// for when adding certain Xbox Controls like XTrigger and XStick,
-		/// which do not use the Value property of Control.
-		/// </summary>
-		/// <param name="one">The first control.</param>
-		/// <param name="val">A float value.</param>
-		/// <returns>The clamped sum of the control value and the provided float argument.</returns>
-		public static float operator +(Control one, float val) {
-			return Mathf.Clamp(one.Value + val, -1f, 1f);
-		}
-	}
-
-	/// <summary>
-	/// Describes the current state of a control's specific state.
-	/// Use (control.Down/Held/Up & flag) != 0 for Positive & Negative.
-	/// Use == for Neither, Both, and Either.
-	/// </summary>
-	[Flags]
-	public enum ControlState {
-		Positive = 1 << 0,
-		Negative = 1 << 1,
-		Neither = Positive & Negative,
-		Both = Positive | Negative,
-		Either = Positive ^ Negative
 	}
 
 	/// <summary>
@@ -308,19 +314,22 @@ namespace BSGTools.IO {
 	/// </summary>
 	[Serializable]
 	public sealed class KeyControl : Control {
+
+		/// <value>
+		/// The OPTIONAL modifier key for this control.
+		/// </value>
+		public ModifierKey Modifier { get; set; }
+
+		/// <value>
+		/// The OPTIONAL negative binding for this control.
+		/// </value>
+		public KeyCode Negative { get; set; }
+
 		/// <value>
 		/// The REQUIRED positive binding for this control.
 		/// CANNOT BE KeyCode.None!
 		/// </value>
 		public KeyCode Positive { get; set; }
-		/// <value>
-		/// The OPTIONAL negative binding for this control.
-		/// </value>
-		public KeyCode Negative { get; set; }
-		/// <value>
-		/// The OPTIONAL modifier key for this control.
-		/// </value>
-		public ModifierKey Modifier { get; set; }
 
 		/// <summary>
 		/// Creates a new KeyControl.
@@ -346,6 +355,15 @@ namespace BSGTools.IO {
 		public KeyControl(KeyCode positive, KeyCode negative)
 			: this(positive) {
 			this.Negative = negative;
+		}
+
+		public override string ToStringBlock() {
+			var sb = new StringBuilder();
+			sb.AppendLine("PositiveKey: " + Positive);
+			sb.AppendLine("NegativeKey: " + Negative);
+			sb.AppendLine("Modifier: " + Modifier.DisplayName);
+			sb.AppendLine(base.ToStringBlock());
+			return sb.ToString().Trim();
 		}
 
 		/// <summary>
@@ -384,15 +402,6 @@ namespace BSGTools.IO {
 				if(Input.GetKeyDown(neg))
 					Down |= ControlState.Negative;
 			}
-		}
-
-		public override string ToStringBlock() {
-			var sb = new StringBuilder();
-			sb.AppendLine("PositiveKey: " + Positive);
-			sb.AppendLine("NegativeKey: " + Negative);
-			sb.AppendLine("Modifier: " + Modifier.DisplayName);
-			sb.AppendLine(base.ToStringBlock());
-			return sb.ToString().Trim();
 		}
 	}
 }
