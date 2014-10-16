@@ -12,6 +12,9 @@ Redistribution and use in source and binary forms, with or without modification,
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
+#define XBOX_ALLOWED
+#endif
 
 using System.Collections.Generic;
 using System.IO;
@@ -19,11 +22,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using BSGTools.IO.Xbox;
 using UnityEditor;
 using UnityEngine;
-#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
-using BSGTools.IO.Xbox;
-#endif
 
 
 namespace BSGTools.IO.Tools {
@@ -65,6 +66,9 @@ namespace BSGTools.IO.Tools {
 		void OnGUI() {
 			//Draw Create Section
 			EditorGUILayout.LabelField("Create", EditorStyles.boldLabel);
+#if !XBOX_ALLOWED
+			EditorGUILayout.LabelField("WARNING: XBOX CONTROLS ARE ONLY SUPPORTED ON WINDOWS BASED OS'S. YOUR BUILD SETTINGS SHOW OTHERWISE!");
+#endif
 			scriptName = EditorGUILayout.TextField("Script Name: ", scriptName);
 
 			var createRequested = GUILayout.Button(string.Format(@"Create InputManager ""{0}""", scriptName));
@@ -83,11 +87,10 @@ namespace BSGTools.IO.Tools {
 			EditorGUILayout.LabelField("Controls", EditorStyles.boldLabel);
 			scroll = EditorGUILayout.BeginScrollView(scroll);
 			DrawControls<KeyControl>(0);
-#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 			DrawControls<XButtonControl>(1);
 			DrawControls<XStickControl>(2);
 			DrawControls<XTriggerControl>(3);
-#endif
+
 			EditorGUILayout.EndScrollView();
 		}
 
@@ -110,14 +113,12 @@ namespace BSGTools.IO.Tools {
 			Control c = null;
 			if(GUILayout.Button("Create New KeyControl"))
 				c = new KeyControl(KeyCode.A);
-#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 			else if(GUILayout.Button("Create New XButtonControl"))
 				c = new XButtonControl(XButton.A, XButton.None);
 			else if(GUILayout.Button("Create New XStickControl"))
 				c = new XStickControl(XStick.StickLeft);
 			else if(GUILayout.Button("Create New XTriggerControl"))
 				c = new XTriggerControl(XTrigger.TriggerLeft);
-#endif
 
 			if(c != null)
 				controlDict.Add(c, new ControlMetadata() { expanded = false, varName = c.Name.ToLower(), createCount = 0 });
@@ -171,15 +172,12 @@ namespace BSGTools.IO.Tools {
 				info.modEnum = (ModifierKey.ModEnums)EditorGUILayout.EnumPopup("Modifier: ", info.modEnum);
 				kc.Modifier = ModifierKey.FromMEnum(info.modEnum);
 			}
-
-#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 			else if(c is XButtonControl)
 				info = DrawXboxSpecific<XButtonControl>(c as XButtonControl, info);
 			else if(c is XStickControl)
 				info = DrawXboxSpecific<XStickControl>(c as XStickControl, info);
 			else if(c is XTriggerControl)
 				info = DrawXboxSpecific<XTriggerControl>(c as XTriggerControl, info);
-#endif
 
 			c.IsDebugControl = EditorGUILayout.Toggle("Debug Control: ", c.IsDebugControl);
 			c.Sensitivity = Mathf.Clamp(EditorGUILayout.FloatField("Sensitivity: ", c.Sensitivity), 0f, Mathf.Infinity);
@@ -192,7 +190,6 @@ namespace BSGTools.IO.Tools {
 			controlDict[c] = info;
 		}
 
-#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 		ControlMetadata DrawXboxSpecific<T>(T c, ControlMetadata info) where T : IXboxControl {
 			var xc = c as XboxControl<T>;
 
@@ -218,7 +215,6 @@ namespace BSGTools.IO.Tools {
 
 			return info;
 		}
-#endif
 		#endregion
 
 		#region Meta Functions
@@ -236,7 +232,6 @@ namespace BSGTools.IO.Tools {
 				sb.AppendLine();
 			}
 
-#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 			var xbs = controlDict.Keys.OfType<XButtonControl>();
 			if(xbs.Count() > 0) {
 				sb.AppendLine("\t#region XButtonControls");
@@ -263,7 +258,6 @@ namespace BSGTools.IO.Tools {
 				sb.AppendLine("\t#endregion");
 				sb.AppendLine();
 			}
-#endif
 
 			var finalText = string.Format(templateText, scriptName, sb.ToString());
 
@@ -295,10 +289,9 @@ namespace BSGTools.IO.Tools {
 			foreach(var f in ModFields)
 				Debug.Log((f.GetValue(null) as ModifierKey).UKeyCode);
 			var field = ModFields.Single(f => (f.GetValue(null) as ModifierKey).UKeyCode == modifier.UKeyCode);
-			return typeof(ModifierKey).Name + field.Name;
+			return typeof(ModifierKey).Name + "." + field.Name;
 		}
 
-#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 		string GetXButtonControlString(XButtonControl control) {
 			var meta = controlDict[control];
 			var multi = meta.createCount > 1;
@@ -393,7 +386,6 @@ namespace BSGTools.IO.Tools {
 			var format = File.ReadAllText(Application.dataPath + ((multi) ? XTRIGGERCONTROLMULTI_TEMPLATE_LOCATION : XTRIGGERCONTROL_TEMPLATE_LOCATION));
 			return string.Format(format, argList);
 		}
-#endif
 		#endregion
 
 		struct ControlMetadata {

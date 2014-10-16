@@ -14,13 +14,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
+#define XBOX_ALLOWED
 using XInputDotNetPure;
+#endif
 
 namespace BSGTools.IO.Xbox {
 	/// <summary>
 	/// A static utility class for minimal required updates for <see cref="XboxControl"/>s.
 	/// </summary>
 	public static class XboxUtils {
+#if XBOX_ALLOWED
 		public const int MAX_CONTROLLER_COUNT = 4;
 
 		private static GamePadState[] _controllerStates = new GamePadState[MAX_CONTROLLER_COUNT];
@@ -82,6 +85,7 @@ namespace BSGTools.IO.Xbox {
 			SetVibration(controller, lrVib, lrVib);
 		}
 
+
 		/// <summary>
 		/// Turn on individual motor vibration for a single controller.
 		/// </summary>
@@ -89,12 +93,13 @@ namespace BSGTools.IO.Xbox {
 			GamePad.SetVibration((PlayerIndex)controller, lVib, rVib);
 		}
 
+
 		/// <summary>
 		/// Check if an individual controller is enabled.
 		/// </summary>
 		public static bool IsConnected(int controller) {
 			return ControllerStates[controller].IsConnected;
 		}
+#endif
 	}
 }
-#endif

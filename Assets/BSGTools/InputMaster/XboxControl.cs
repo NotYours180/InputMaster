@@ -14,10 +14,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
-
-using System;
-using UnityEngine;
+#define XBOX_ALLOWED
 using XInputDotNetPure;
+#endif
+using System;
+using System.Diagnostics;
+using UnityEngine;
 
 namespace BSGTools.IO.Xbox {
 	/// <summary>
@@ -133,12 +135,18 @@ namespace BSGTools.IO.Xbox {
 		/// Updates this control's states.
 		/// </summary>
 		protected override void UpdateStates() {
+#if XBOX_ALLOWED
 			var gpState = XboxUtils.ControllerStates[ControllerIndex];
 			var pos = (Invert) ? Negative : Positive;
 			var neg = (Invert) ? Positive : Negative;
 
-			var positivePressed = XBindingVal(pos, gpState);
-			var negativePressed = XBindingVal(neg, gpState);
+			var positivePressed = false;
+			var negativePressed = false;
+
+
+			positivePressed = XBindingVal(pos, gpState);
+			negativePressed = XBindingVal(neg, gpState);
+
 
 			if(positivePressed) {
 				Held |= ControlState.Positive;
@@ -168,9 +176,10 @@ namespace BSGTools.IO.Xbox {
 				reportedNegUp = true;
 				reportedNegDown = false;
 			}
-
+#endif
 		}
 
+#if XBOX_ALLOWED
 		/// <summary>
 		/// An internal method of translating from XButton to it's logical state.
 		/// </summary>
@@ -215,6 +224,7 @@ namespace BSGTools.IO.Xbox {
 					throw new ArgumentException("", "xb");
 			}
 		}
+#endif
 
 		/// <summary>
 		/// Creates a clone of this XButtonControl.
@@ -269,13 +279,16 @@ namespace BSGTools.IO.Xbox {
 		/// <summary>
 		/// States are not used for stick controls.
 		/// </summary>
-		protected override void UpdateStates() { }
+		protected override void UpdateStates() {
+
+		}
 
 		/// <summary>
 		/// Updates this control's values.
 		/// The <see cref="StickValue"/> property is updated in <see cref="UpdateStates"/>.
 		/// </summary>
 		protected override void UpdateValues() {
+#if XBOX_ALLOWED
 			var gpState = XboxUtils.ControllerStates[ControllerIndex];
 			var stick = (Stick == XStick.StickLeft) ? gpState.ThumbSticks.Left : gpState.ThumbSticks.Right;
 			var val = Vector2.zero;
@@ -285,6 +298,9 @@ namespace BSGTools.IO.Xbox {
 			RealValue = (StickValue.x + StickValue.y) / 2f;
 			Value = RealValue;
 			FixedValue = (sbyte)(Mathf.Sign(RealValue) * Mathf.CeilToInt(Mathf.Abs(RealValue)));
+#else
+			Reset();
+#endif
 		}
 
 		/// <summary>
@@ -341,6 +357,7 @@ namespace BSGTools.IO.Xbox {
 		/// In this specialized case, the values are updated here, not the states.
 		/// </summary>
 		protected override void UpdateStates() {
+#if XBOX_ALLOWED
 			var gpState = XboxUtils.ControllerStates[ControllerIndex];
 			var triggerVal = (Trigger == XTrigger.TriggerLeft) ? gpState.Triggers.Left : gpState.Triggers.Right;
 
@@ -350,6 +367,7 @@ namespace BSGTools.IO.Xbox {
 				Up = ControlState.Positive;
 			else if(Mathf.Approximately(triggerVal, RealValue))
 				Held = ControlState.Positive;
+#endif
 		}
 
 		/// <summary>
@@ -357,12 +375,16 @@ namespace BSGTools.IO.Xbox {
 		/// </summary>
 		/// <see cref="UpdateStates"/>
 		protected override void UpdateValues() {
+#if XBOX_ALLOWED
 			var gpState = XboxUtils.ControllerStates[ControllerIndex];
 
 			RealValue = (Trigger == XTrigger.TriggerLeft) ? gpState.Triggers.Left : gpState.Triggers.Right;
 			RealValue = (Invert) ? -RealValue : RealValue;
 			Value = RealValue;
 			FixedValue = (sbyte)Mathf.CeilToInt(RealValue);
+#else
+			Reset();
+#endif
 		}
 
 		/// <summary>
@@ -421,4 +443,3 @@ namespace BSGTools.IO.Xbox {
 		DPadRight
 	}
 }
-#endif
