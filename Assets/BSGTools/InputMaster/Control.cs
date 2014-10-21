@@ -277,10 +277,20 @@ namespace BSGTools.IO {
 			return "UNNAMED_" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 		}
 
+		/// <summary>
+		/// Returns a fixed control range float.
+		/// </summary>
+		/// <param name="f">A float to clamp.</param>
+		/// <returns>A float fixed to -1...1</returns>
 		public static float ClampRange(float f) {
 			return Mathf.Clamp(f, -1f, 1f);
 		}
 
+		/// <summary>
+		/// Rounds and clamps to a FixedValue sbyte.
+		/// </summary>
+		/// <param name="f">The value to round and clamp.</param>
+		/// <returns>-1, 1 or 0</returns>
 		public static sbyte RoundFixed(float f) {
 			if(f < 0f)
 				return -1;
@@ -290,6 +300,11 @@ namespace BSGTools.IO {
 				return 0;
 		}
 
+		/// <summary>
+		/// Rounds and clamps to a FixedValue float.
+		/// </summary>
+		/// <param name="f">The value to round and clamp.</param>
+		/// <returns>-1, 1 or 0</returns>
 		public static float RoundFixedF(float f) {
 			if(f < 0f)
 				return -1f;

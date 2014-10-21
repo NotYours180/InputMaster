@@ -21,41 +21,57 @@ using UnityEngine;
 namespace BSGTools.IO {
 
 	/// <summary>
-	/// Allows for easy combination of two control's outputs.
+	/// Allows for easy combination of multiple controls' outputs.
 	/// </summary>
-	/// <typeparam name="C1">Any control.</typeparam>
-	/// <typeparam name="C2">Any control.</typeparam>
 	public class CombinedOutput {
 
+		/// <value>
+		/// The clamped, combined FixedValue as a float.
+		/// </value>
 		public float FixedValueF {
 			get {
-				return Control.RoundFixedF(ControlA.FixedValue + ControlB.FixedValue);
+				float total = 0f;
+				foreach(var c in Controls)
+					total += c.FixedValue;
+				return Control.RoundFixedF(total);
 			}
 		}
+
+		/// <value>
+		/// The clamped, combined FixedValue.
+		/// </value>
 		public sbyte FixedValue {
 			get {
-				return Control.RoundFixed(ControlA.FixedValue + ControlB.FixedValue);
+				float total = 0f;
+				foreach(var c in Controls)
+					total += c.FixedValue;
+				return Control.RoundFixed(total);
 			}
 		}
 
+		/// <value>
+		/// The clamped, combined Value.
+		/// </value>
 		public float Value {
 			get {
-				return Control.ClampRange(ControlA.Value + ControlB.Value);
+				float total = 0f;
+				foreach(var c in Controls)
+					total += c.Value;
+				return Control.ClampRange(total);
 			}
 		}
 
 		/// <value>
-		/// The first control to combine.
+		/// The combined Controls.
 		/// </value>
-		public Control ControlA { get; private set; }
-		/// <value>
-		/// The second control to combine.
-		/// </value>
-		public Control ControlB { get; private set; }
+		public Control[] Controls { get; private set; }
 
-		internal CombinedOutput(Control controlA, Control controlB) {
-			this.ControlA = controlA;
-			this.ControlB = controlB;
+		/// <summary>
+		/// Creates a new CombinedOutput.
+		/// </summary>
+		/// <param name="controls">The controls to combine into a single output.</param>
+		public CombinedOutput(params Control[] controls) {
+			this.Controls = controls;
 		}
 	}
 }
