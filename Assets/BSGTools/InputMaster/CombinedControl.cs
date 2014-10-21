@@ -19,6 +19,15 @@ using BSGTools.IO.Xbox;
 using UnityEngine;
 
 namespace BSGTools.IO {
+
+	public static class CombinedControl {
+		public static CombinedControl<C1, C2> Create<C1, C2>(C1 c1, C2 c2)
+			where C1 : Control
+			where C2 : Control {
+			return new CombinedControl<C1, C2>(c1, c2);
+		}
+	}
+
 	/// <summary>
 	/// Allows for easy combination of two control's outputs.
 	/// </summary>
@@ -54,7 +63,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public C2 Control2 { get; private set; }
 
-		protected CombinedControl(C1 c1, C2 c2) {
+		internal CombinedControl(C1 c1, C2 c2) {
 			this.Control1 = c1;
 			this.Control2 = c2;
 		}
