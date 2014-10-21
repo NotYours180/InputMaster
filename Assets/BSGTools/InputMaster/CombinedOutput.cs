@@ -17,6 +17,7 @@ using System;
 using System.Text;
 using BSGTools.IO.Xbox;
 using UnityEngine;
+using System.Linq;
 
 namespace BSGTools.IO {
 
@@ -60,6 +61,59 @@ namespace BSGTools.IO {
 				return Control.ClampRange(total);
 			}
 		}
+
+		#region Control States
+		/// <value>
+		/// Are any controls in a Down+ state?
+		/// </value>
+		public bool AnyDownPositive {
+			get {
+				return Controls.Any(c => c.Down == ControlState.Positive);
+			}
+		}
+		/// <value>
+		/// Are any controls in a Down- state?
+		/// </value>
+		public bool AnyDownNegative {
+			get {
+				return Controls.Any(c => c.Down == ControlState.Negative);
+			}
+		}
+
+		/// <value>
+		/// Are any controls in a Held+ state?
+		/// </value>
+		public bool AnyHeldPositive {
+			get {
+				return Controls.Any(c => c.Held == ControlState.Positive);
+			}
+		}
+		/// <value>
+		/// Are any controls in a Held- state?
+		/// </value>
+		public bool AnyHeldNegative {
+			get {
+				return Controls.Any(c => c.Held == ControlState.Negative);
+			}
+		}
+
+		/// <value>
+		/// Are any controls in a Up+ state?
+		/// </value>
+		public bool AnyUpPositive {
+			get {
+				return Controls.Any(c => c.Up == ControlState.Positive);
+			}
+		}
+		/// <value>
+		/// Are any controls in a Up- state?
+		/// </value>
+		public bool AnyUpNegative {
+			get {
+				return Controls.Any(c => c.Up == ControlState.Negative);
+			}
+		}
+		#endregion
 
 		/// <value>
 		/// The combined Controls.
