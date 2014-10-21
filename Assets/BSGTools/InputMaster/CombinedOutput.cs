@@ -20,52 +20,42 @@ using UnityEngine;
 
 namespace BSGTools.IO {
 
-	public static class CombinedControl {
-		public static CombinedControl<C1, C2> Create<C1, C2>(C1 c1, C2 c2)
-			where C1 : Control
-			where C2 : Control {
-			return new CombinedControl<C1, C2>(c1, c2);
-		}
-	}
-
 	/// <summary>
 	/// Allows for easy combination of two control's outputs.
 	/// </summary>
 	/// <typeparam name="C1">Any control.</typeparam>
 	/// <typeparam name="C2">Any control.</typeparam>
-	public class CombinedControl<C1, C2>
-		where C1 : Control
-		where C2 : Control {
+	public class CombinedOutput {
 
 		public float FixedValueF {
 			get {
-				return Control.RoundFixedF(Control1.FixedValue + Control2.FixedValue);
+				return Control.RoundFixedF(ControlA.FixedValue + ControlB.FixedValue);
 			}
 		}
 		public sbyte FixedValue {
 			get {
-				return Control.RoundFixed(Control1.FixedValue + Control2.FixedValue);
+				return Control.RoundFixed(ControlA.FixedValue + ControlB.FixedValue);
 			}
 		}
 
 		public float Value {
 			get {
-				return Control.ClampRange(Control1.Value + Control2.Value);
+				return Control.ClampRange(ControlA.Value + ControlB.Value);
 			}
 		}
 
 		/// <value>
 		/// The first control to combine.
 		/// </value>
-		public C1 Control1 { get; private set; }
+		public Control ControlA { get; private set; }
 		/// <value>
 		/// The second control to combine.
 		/// </value>
-		public C2 Control2 { get; private set; }
+		public Control ControlB { get; private set; }
 
-		internal CombinedControl(C1 c1, C2 c2) {
-			this.Control1 = c1;
-			this.Control2 = c2;
+		internal CombinedOutput(Control controlA, Control controlB) {
+			this.ControlA = controlA;
+			this.ControlB = controlB;
 		}
 	}
 }
