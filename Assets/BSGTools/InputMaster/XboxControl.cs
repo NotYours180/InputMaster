@@ -15,9 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
-
 using XInputDotNetPure;
-
 #endif
 
 using System;
@@ -51,8 +49,10 @@ namespace BSGTools.IO.Xbox {
 	/// Represents the two analog sticks of an Xbox 360 Controller.
 	/// </summary>
 	public enum XStick {
-		StickLeft,
-		StickRight
+		StickLeftX,
+		StickLeftY,
+		StickRightX,
+		StickRightY
 	}
 
 	/// <summary>
@@ -119,9 +119,8 @@ namespace BSGTools.IO.Xbox {
 			if(count < 2 || count > 4)
 				throw new ArgumentOutOfRangeException("count");
 			var xbc = new T[count];
-			for(byte i = 0;i < count;i++) {
+			for(byte i = 0;i < count;i++)
 				xbc[i] = (toClone as XboxControl<T>).CreateClone(i);
-			}
 			return xbc;
 		}
 
@@ -247,10 +246,8 @@ namespace BSGTools.IO.Xbox {
 			switch(xb) {
 				case XButton.None:
 					return false;
-
 				case XButton.A:
 					return (state.Buttons.A == ButtonState.Pressed);
-
 				case XButton.B:
 					return (state.Buttons.B == ButtonState.Pressed);
 
@@ -306,21 +303,10 @@ namespace BSGTools.IO.Xbox {
 	/// </summary>
 	[Serializable]
 	public sealed class XStickControl : XboxControl<XStickControl>, IXboxControl {
-
-		/// <value>
-		/// How inversion should be applied to this control.
-		/// </value>
-		public InvertMode InversionMode { get; set; }
-
 		/// <value>
 		/// The assigned analog stick.
 		/// </value>
 		public XStick Stick { get; set; }
-
-		/// <value>
-		/// The X/Y axis values for this control.
-		/// </value>
-		public Vector2 StickValue { get; private set; }
 
 		/// <summary>
 		/// Creates an XStickControl for a single player game.
@@ -365,16 +351,21 @@ namespace BSGTools.IO.Xbox {
 		protected override void UpdateValues() {
 #if XBOX_ALLOWED
 			var gpState = XboxUtils.ControllerStates[ControllerIndex];
-			var stick = (Stick == XStick.StickLeft) ? gpState.ThumbSticks.Left : gpState.ThumbSticks.Right;
-			var val = Vector2.zero;
-			val.x = (InversionMode.HasFlag(InvertMode.X) && Invert) ? -stick.X : stick.X;
-			val.y = (InversionMode.HasFlag(InvertMode.Y) && Invert) ? -stick.Y : stick.Y;
-			StickValue = val;
-			RealValue = (StickValue.x + StickValue.y) / 2f;
-			Value = RealValue;
-			FixedValue = (sbyte)(Mathf.Sign(RealValue) * Mathf.CeilToInt(Mathf.Abs(RealValue)));
-#else
-			Reset();
+			var sticks = gpState.ThumbSticks;
+			var val = 0f;
+
+			if(Stick == XStick.StickLeftX)
+				val = sticks.Left.X;
+			else if(Stick == XStick.StickLeftY)
+				val = sticks.Left.Y;
+			else if(Stick == XStick.StickRightX)
+				val = sticks.Right.X;
+			else if(Stick == XStick.StickRightY)
+				val = sticks.Right.Y;
+			val = (Invert) ? -val : val;
+
+			Value = RealValue = val;
+			FixedValue = RoundFixed(Value);
 #endif
 		}
 
@@ -457,7 +448,7 @@ namespace BSGTools.IO.Xbox {
 			RealValue = (Trigger == XTrigger.TriggerLeft) ? gpState.Triggers.Left : gpState.Triggers.Right;
 			RealValue = (Invert) ? -RealValue : RealValue;
 			Value = RealValue;
-			FixedValue = (sbyte)Mathf.CeilToInt(RealValue);
+			FixedValue = RoundFixed(Value);
 #else
 			Reset();
 #endif

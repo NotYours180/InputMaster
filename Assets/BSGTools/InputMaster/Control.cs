@@ -147,33 +147,6 @@ namespace BSGTools.IO {
 		}
 
 		/// <summary>
-		/// Adds the <see cref="Value"/> properties of a variable amount of controls.
-		/// The return value is clamped between -1...1
-		/// If you have multiple control options for a single in-game action,
-		/// this is how you gather the final input value for the action.
-		/// </summary>
-		/// <param name="one">The first control.</param>
-		/// <param name="two">The second control.</param>
-		/// <returns>The clamped sum of the control values.</returns>
-		public static float operator +(Control one, Control two) {
-			return Mathf.Clamp(one.Value + two.Value, -1f, 1f);
-		}
-
-		/// <summary>
-		/// Adds the <see cref="Value"/> properties of a variable amount of controls and floats.
-		/// The return value is clamped between -1...1
-		/// This has the same use-case as +(Control, Control), except this is useful
-		/// for when adding certain Xbox Controls like XTrigger and XStick,
-		/// which do not use the Value property of Control.
-		/// </summary>
-		/// <param name="one">The first control.</param>
-		/// <param name="val">A float value.</param>
-		/// <returns>The clamped sum of the control value and the provided float argument.</returns>
-		public static float operator +(Control one, float val) {
-			return Mathf.Clamp(one.Value + val, -1f, 1f);
-		}
-
-		/// <summary>
 		/// Reset all non-configuration values and states for this control.
 		/// </summary>
 		/// <seealso cref="Reset(bool)"/>
@@ -293,10 +266,7 @@ namespace BSGTools.IO {
 			if(Mathf.Abs(RealValue) <= Mathf.Abs(Dead))
 				Value = 0f;
 
-			if(Held.HasFlag(ControlState.Positive) || Down.HasFlag(ControlState.Positive))
-				FixedValue += 1;
-			if(Held.HasFlag(ControlState.Negative) || Down.HasFlag(ControlState.Negative))
-				FixedValue -= 1;
+			FixedValue = RoundFixed(Value);
 		}
 
 		/// <summary>
@@ -305,6 +275,28 @@ namespace BSGTools.IO {
 		/// <returns>A new random string.</returns>
 		private static string GetRandomName() {
 			return "UNNAMED_" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+		}
+
+		public static float ClampRange(float f) {
+			return Mathf.Clamp(f, -1f, 1f);
+		}
+
+		public static sbyte RoundFixed(float f) {
+			if(f < 0f)
+				return -1;
+			if(f > 0f)
+				return 1;
+			else
+				return 0;
+		}
+
+		public static float RoundFixedF(float f) {
+			if(f < 0f)
+				return -1f;
+			if(f > 0f)
+				return 1f;
+			else
+				return 0f;
 		}
 	}
 

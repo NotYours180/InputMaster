@@ -179,7 +179,7 @@ namespace BSGTools.IO.Tools {
 			else if(GUILayout.Button("Create New XButtonControl"))
 				c = new XButtonControl(XButton.A, XButton.None);
 			else if(GUILayout.Button("Create New XStickControl"))
-				c = new XStickControl(XStick.StickLeft);
+				c = new XStickControl(XStick.StickLeftX);
 			else if(GUILayout.Button("Create New XTriggerControl"))
 				c = new XTriggerControl(XTrigger.TriggerLeft);
 
