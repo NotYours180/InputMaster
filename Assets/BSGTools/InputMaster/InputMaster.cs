@@ -124,10 +124,10 @@ namespace BSGTools.IO {
 		/// </value>
 		public float MouseYRaw { get; private set; }
 
-		public CombinedOutput ui_HorizontalAxis { get; private set; }
-		public CombinedOutput ui_VerticalAxis { get; private set; }
-		public CombinedOutput ui_SubmitButton { get; private set; }
-		public CombinedOutput ui_CancelButton { get; private set; }
+		public CombinedOutput ui_HorizontalAxis { get; set; }
+		public CombinedOutput ui_VerticalAxis { get; set; }
+		public CombinedOutput ui_SubmitButton { get; set; }
+		public CombinedOutput ui_CancelButton { get; set; }
 
 		#endregion Properties
 
