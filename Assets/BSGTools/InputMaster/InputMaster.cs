@@ -16,6 +16,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
 #endif
+#if UNITY_4_6
+using UnityEngine.EventSystems;
+#endif
 
 using System;
 using System.Collections.Generic;
@@ -120,6 +123,11 @@ namespace BSGTools.IO {
 		/// The Mouse Y Axis raw axis value from Unity's native Input system.
 		/// </value>
 		public float MouseYRaw { get; private set; }
+
+		public CombinedOutput ui_HorizontalAxis { get; private set; }
+		public CombinedOutput ui_VerticalAxis { get; private set; }
+		public CombinedOutput ui_SubmitButton { get; private set; }
+		public CombinedOutput ui_CancelButton { get; private set; }
 
 		#endregion Properties
 
@@ -242,6 +250,10 @@ namespace BSGTools.IO {
 			XboxUtils.UpdateStates();
 #endif
 
+#if UNITY_4_6
+			UpdateInputModule();
+#endif
+
 			if(string.IsNullOrEmpty(MouseXAxisName) == false) {
 				MouseX = Input.GetAxis(MouseXAxisName);
 				MouseXRaw = Input.GetAxisRaw(MouseXAxisName);
@@ -271,6 +283,22 @@ namespace BSGTools.IO {
 						AnyControlUp = true;
 				}
 			}
+		}
+
+		private void UpdateInputModule() {
+#if UNITY_4_6
+			if(EventSystem.current == null)
+				return;
+
+			var im = EventSystem.current.gameObject.GetComponent<InputMasterInputModule>();
+			if(im == null)
+				return;
+
+			im.horizontalAxis = ui_HorizontalAxis;
+			im.verticalAxis = ui_VerticalAxis;
+			im.submitButton = ui_SubmitButton;
+			im.cancelButton = ui_CancelButton;
+#endif
 		}
 
 		#endregion Methods
