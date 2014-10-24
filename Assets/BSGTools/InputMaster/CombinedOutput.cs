@@ -25,6 +25,9 @@ namespace BSGTools.IO {
 	/// Allows for easy combination of multiple controls' outputs.
 	/// </summary>
 	public class CombinedOutput {
+		public delegate float OnAddPost();
+		public event OnAddPost AddPostClamped;
+		public event OnAddPost AddPost;
 
 		/// <value>
 		/// The clamped, combined FixedValue as a float.
@@ -34,7 +37,14 @@ namespace BSGTools.IO {
 				float total = 0f;
 				foreach(var c in Controls)
 					total += c.FixedValue;
-				return Control.RoundFixedF(total);
+
+				float post = 0f;
+				float postClamped = 0f;
+				if(AddPost != null)
+					post = AddPost();
+				if(AddPostClamped != null)
+					postClamped = AddPostClamped();
+				return Control.ClampRange(total + postClamped) + post;
 			}
 		}
 
@@ -46,7 +56,14 @@ namespace BSGTools.IO {
 				float total = 0f;
 				foreach(var c in Controls)
 					total += c.FixedValue;
-				return Control.RoundFixed(total);
+
+				float post = 0f;
+				float postClamped = 0f;
+				if(AddPost != null)
+					post = AddPost();
+				if(AddPostClamped != null)
+					postClamped = AddPostClamped();
+				return (sbyte)(Control.ClampRange(total + postClamped) + post);
 			}
 		}
 
@@ -58,7 +75,14 @@ namespace BSGTools.IO {
 				float total = 0f;
 				foreach(var c in Controls)
 					total += c.Value;
-				return Control.ClampRange(total);
+
+				float post = 0f;
+				float postClamped = 0f;
+				if(AddPost != null)
+					post = AddPost();
+				if(AddPostClamped != null)
+					postClamped = AddPostClamped();
+				return Control.ClampRange(total + postClamped) + post;
 			}
 		}
 

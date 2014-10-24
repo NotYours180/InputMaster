@@ -266,7 +266,7 @@ namespace BSGTools.IO {
 			if(Mathf.Abs(RealValue) <= Mathf.Abs(Dead))
 				Value = 0f;
 
-			FixedValue = RoundFixed(Value);
+			FixedValue = GetFV();
 		}
 
 		/// <summary>
@@ -291,11 +291,11 @@ namespace BSGTools.IO {
 		/// </summary>
 		/// <param name="f">The value to round and clamp.</param>
 		/// <returns>-1, 1 or 0</returns>
-		public static sbyte RoundFixed(float f) {
-			if(f < 0f)
-				return -1;
-			if(f > 0f)
+		public sbyte GetFV() {
+			if(Down == ControlState.Positive || Held == ControlState.Positive)
 				return 1;
+			else if(Down == ControlState.Negative || Held == ControlState.Negative)
+				return -1;
 			else
 				return 0;
 		}
@@ -305,13 +305,8 @@ namespace BSGTools.IO {
 		/// </summary>
 		/// <param name="f">The value to round and clamp.</param>
 		/// <returns>-1, 1 or 0</returns>
-		public static float RoundFixedF(float f) {
-			if(f < 0f)
-				return -1f;
-			if(f > 0f)
-				return 1f;
-			else
-				return 0f;
+		public float GetFVF() {
+			return (float)GetFV();
 		}
 	}
 
@@ -389,7 +384,7 @@ namespace BSGTools.IO {
 				if(RealValue > 0f)
 					Up |= ControlState.Positive;
 				else if(RealValue < 0f)
-					Up |= ControlState.Positive;
+					Up |= ControlState.Negative;
 
 				return;
 			}

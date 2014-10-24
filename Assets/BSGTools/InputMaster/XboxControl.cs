@@ -365,7 +365,7 @@ namespace BSGTools.IO.Xbox {
 			val = (Invert) ? -val : val;
 
 			Value = RealValue = val;
-			FixedValue = RoundFixed(Value);
+			FixedValue = GetFV();
 #endif
 		}
 
@@ -448,7 +448,7 @@ namespace BSGTools.IO.Xbox {
 			RealValue = (Trigger == XTrigger.TriggerLeft) ? gpState.Triggers.Left : gpState.Triggers.Right;
 			RealValue = (Invert) ? -RealValue : RealValue;
 			Value = RealValue;
-			FixedValue = RoundFixed(Value);
+			FixedValue = GetFV();
 #else
 			Reset();
 #endif
