@@ -64,7 +64,9 @@ namespace BSGTools.Structure {
 						Debug.LogError(string.Format("[Singleton] found {0} instances of {1}", all.Length, typeName));
 						_instance = all[0];
 					}
-					else if(all.Length == 0) {
+					else if(all.Length == 1)
+						_instance = all[0];
+					else {
 						var parent = new GameObject("[Singleton] " + typeName);
 						DontDestroyOnLoad(parent);
 						_instance = parent.AddComponent<T>();
