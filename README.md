@@ -4,13 +4,9 @@
 
 A revolution of Input management for [Unity](http://unity3d.com/) designed for programmers, by a programmer.
 
-**Latest Version: v6.3.0**
+Uses Semantic Versioning (Major.Minor.Fixes)
 
-Uses Semantic Versioning (Major.Minor.Fixes):
-
-Major is obvious -- Some giant change or addition to the project was made. Minor versions normally indicate new features or existing feature updates, and fixes are... fixes.
-
-This was originally part of a larger project of random shit called BSGTools (BirdStreet Games Tools for short). This large package is being discontinued, and instead, its individual components will be distributed, open source, right here on GitHub. It is designed to be plug-n-play of sorts. Importing any BSGTools component .unitypackage file will import under a single BSGTools directory to keep everything nice and clean. Please note that during this update process, some documentation will be out of date until it can be updated.
+This was originally part of a larger project of random stuff called BSGTools (BirdStreet Games Tools). This large package is being discontinued, and instead, its individual components will be distributed, open source, right here on GitHub. It is designed to be plug-n-play of sorts. Importing any BSGTools component .unitypackage file will import under a single BSGTools directory to keep everything nice and clean. Please note that during this update process, some documentation will be out of date until it can be updated.
 
 [BSGTools Unity Community Wiki Page](http://wiki.unity3d.com/index.php/BSGTools)
 
@@ -33,13 +29,13 @@ Pretty easy, right? Just don't edit the big comment at the top of each code file
 
 #### About ###
 InputMaster was designed to accomplish several tasks:
-* Make Input management variable based instead of string based. (COMPLETE!)
-* Allow for configuration of *any* property of a control at runtime. (COMPLETE!)
-* Integrate modern support for Xbox 360 Controllers using XInputDotNET (COMPLETE!)
- * Note this is only supported for Windows builds and the Windows Unity Editor. The feature is disabled using preprocessor directives when this is not the case, so you shouldn't get any exceptions.
-* Be comfortable primarily for programmers.
-* Support modifier keys!
-* Be open source (**Definitely** COMPLETE!)
+* Make Input management variable based instead of string based
+* Allow for configuration of *any* property of a control at runtime
+* Integrate modern support for Xbox 360 Controllers using XInputDotNET
+ * Note this is only supported for Windows builds and the Windows Unity Editor. The feature is disabled using preprocessor directives when this is not the case, so you shouldn't get any exceptions
+* Be comfortable primarily for programmers
+* Support modifier keys
+* Be open source
 
 To see how InputMaster works in more detail, please visit the [BSGTools Unity Community Wiki Page](http://wiki.unity3d.com/index.php/BSGTools).
 
@@ -52,12 +48,12 @@ Getting started is easy peasy, just run the **.unitypackage** file located at th
 There are additional steps that are required for XInputDotNET to function with Unity Basic. Visit the XInputDotNET GitHub repository to view these instructions (they are not listed here because they are subject to change by the author).
 
 #### Where can I find tutorials? ####
-There are example scenes included with all BSGTools packages, this one being no exception. There are also tutorials located at the bottom of the [BSGTools Unity Community Wiki Page](http://wiki.unity3d.com/index.php/BSGTools)!
+When possible, there will example scenes included with BSGTools packages. There are also tutorials located at the bottom of the [BSGTools Unity Community Wiki Page](http://wiki.unity3d.com/index.php/BSGTools)!
 
 #### Contribution guidelines ####
 Nothing too crazy here, folks. I'll check anything that is added before it is merged into the master branch. A merge request may be denied for several reasons, however:
 
-* The changes made do not help to further the goals of the project, or are not complementary to the current project goals. An example of a complementary goal for this project would be PS3 Controller support.
+* The changes made do not help to further the goals of the project, or are not complementary to the current project goals. An example of a complementary goal for this project would be support for additional controllers.
 * The changes made hinder any individual part of the project.
 * The changes made are so drastic to the core components of the project that it can be considered a complete conversion. Depending on the scenario changes like these may be approved. 
 
