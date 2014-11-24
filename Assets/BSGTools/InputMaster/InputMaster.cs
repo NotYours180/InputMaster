@@ -34,8 +34,6 @@ namespace BSGTools.IO {
 	/// </summary>
 	public static class EnumExt {
 
-		#region Methods
-
 		/// <summary>
 		/// Similar to .NET 4.0+'s method to check if a flag is set on an enum.
 		/// </summary>
@@ -46,7 +44,6 @@ namespace BSGTools.IO {
 			return (Convert.ToInt64(value) & Convert.ToInt64(flag)) != 0;
 		}
 
-		#endregion Methods
 	}
 
 	/// <summary>
@@ -56,13 +53,7 @@ namespace BSGTools.IO {
 	[DisallowMultipleComponent]
 	public class InputMaster : MonoBehaviour {
 
-		#region Fields
-
-		private List<Control> controls = new List<Control>();
-
-		#endregion Fields
-
-		#region Properties
+		Control[] controls;
 
 		/// <value>
 		/// Are any controls in an active Down state?
@@ -124,18 +115,15 @@ namespace BSGTools.IO {
 		/// </value>
 		public float MouseYRaw { get; private set; }
 
-		public CombinedOutput ui_HorizontalAxis { get; set; }
-		public CombinedOutput ui_VerticalAxis { get; set; }
-		public CombinedOutput ui_SubmitButton { get; set; }
-		public CombinedOutput ui_CancelButton { get; set; }
-
-		#endregion Properties
-
-		#region Methods
+		public CombinedOutput coUIHorizontalAxis { get; set; }
+		public CombinedOutput coUIVerticalAxis { get; set; }
+		public CombinedOutput coUISubmitButton { get; set; }
+		public CombinedOutput coUICancelButton { get; set; }
 
 		/// <summary>
 		/// Uses reflection to get all controls in a class.
-		/// Depending on the control count from your controlClass, this could have a noticable performance spike unless used during loading.
+		/// Depending on the control count from your controlClass,
+		/// this could have a noticable performance spike unless used during loading.
 		/// </summary>
 		/// <param name="controlClass">The instance of a class to get the controls from.</param>
 		/// <returns>The new InputMaster instance.</returns>
@@ -153,7 +141,7 @@ namespace BSGTools.IO {
 			var parent = new GameObject("_InputMaster");
 			DontDestroyOnLoad(parent);
 			var master = parent.AddComponent<InputMaster>();
-			master.controls.AddRange(controls);
+			master.controls = controls;
 			return master;
 		}
 
@@ -184,19 +172,19 @@ namespace BSGTools.IO {
 				c.IsBlocked = blocked;
 		}
 
-		/// <summary>
-		/// Searches the control list for the provided Control objects
-		/// and replaces them with said provided object
-		/// </summary>
-		/// <param name="controls">The Control objects to search and replace</param>
-		public void UpdateControls(params Control[] controls) {
-			foreach(var c in controls) {
-				int index = this.controls.IndexOf(c);
-				if(index == -1)
-					throw new System.ArgumentException(string.Format("Could not find Control {0} in master control list. Aborting!", c.ToString()));
-				this.controls[index] = c;
-			}
-		}
+		///// <summary>
+		///// Searches the control list for the provided Control objects
+		///// and replaces them with said provided object
+		///// </summary>
+		///// <param name="controls">The Control objects to search and replace</param>
+		//public void UpdateControls(params Control[] controls) {
+		//	foreach(var c in controls) {
+		//		int index = this.controls.IndexOf(c);
+		//		if(index == -1)
+		//			throw new System.ArgumentException(string.Format("Could not find Control {0} in master control list. Aborting!", c.ToString()));
+		//		this.controls[index] = c;
+		//	}
+		//}
 
 		/// <summary>
 		/// Internally used to get all <see cref="Control"/> variables using reflection from a class instance.
@@ -294,13 +282,12 @@ namespace BSGTools.IO {
 			if(im == null)
 				return;
 
-			im.horizontalAxis = ui_HorizontalAxis;
-			im.verticalAxis = ui_VerticalAxis;
-			im.submitButton = ui_SubmitButton;
-			im.cancelButton = ui_CancelButton;
+			im.horizontalAxis = coUIHorizontalAxis;
+			im.verticalAxis = coUIVerticalAxis;
+			im.submitButton = coUISubmitButton;
+			im.cancelButton = coUICancelButton;
 #endif
 		}
 
-		#endregion Methods
 	}
 }

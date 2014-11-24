@@ -246,8 +246,6 @@ namespace BSGTools.IO.Tools {
 		}
 
 		private string GetModStr(ModifierKey modifier) {
-			foreach(var f in ModFields)
-				Debug.Log((f.GetValue(null) as ModifierKey).UKeyCode);
 			var field = ModFields.Single(f => (f.GetValue(null) as ModifierKey).UKeyCode == modifier.UKeyCode);
 			return typeof(ModifierKey).Name + "." + field.Name;
 		}

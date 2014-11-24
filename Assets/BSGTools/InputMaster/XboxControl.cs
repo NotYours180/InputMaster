@@ -342,41 +342,47 @@ namespace BSGTools.IO.Xbox {
 		/// States are not used for stick controls.
 		/// </summary>
 		protected override void UpdateStates() {
-		}
-
-		/// <summary>
-		/// Updates this control's values.
-		/// The <see cref="StickValue"/> property is updated in <see cref="UpdateStates"/>.
-		/// </summary>
-		protected override void UpdateValues() {
 #if XBOX_ALLOWED
 			var gpState = XboxUtils.ControllerStates[ControllerIndex];
 			var sticks = gpState.ThumbSticks;
-			var val = 0f;
 
 			if(Stick == XStick.StickLeftX)
-				val = sticks.Left.X;
+				RealValue = sticks.Left.X;
 			else if(Stick == XStick.StickLeftY)
-				val = sticks.Left.Y;
+				RealValue = sticks.Left.Y;
 			else if(Stick == XStick.StickRightX)
-				val = sticks.Right.X;
+				RealValue = sticks.Right.X;
 			else if(Stick == XStick.StickRightY)
-				val = sticks.Right.Y;
-			val = (Invert) ? -val : val;
+				RealValue = sticks.Right.Y;
+			RealValue = (Invert) ? -RealValue : RealValue;
 
-			Value = RealValue = val;
+
+
+			if(Value == 0f && RealValue > 0f)
+				Down = ControlState.Positive;
+			else if(Value == 0f && RealValue < 0f)
+				Down = ControlState.Negative;
+
+			if(Value > 0f && RealValue == 0f)
+				Up = ControlState.Positive;
+			else if(Value < 0f && RealValue == 0f)
+				Up = ControlState.Negative;
+
+			if(RealValue > 0f)
+				Held = ControlState.Positive;
+			else if(RealValue < 0f)
+				Held = ControlState.Negative;
+
+			Value = RealValue;
 			FixedValue = GetFV();
 #endif
 		}
 
 		/// <summary>
-		/// Because there are 2 axes to worry about, a specialized enumeration is used to allow for different inversion modes.
+		/// Does nothing. Stick's value/state dependencies are switched.
+		/// Updates happen in <see cref="UpdateStates"/>.
 		/// </summary>
-		[Flags]
-		public enum InvertMode {
-			X = 1 >> 0,
-			Y = 1 >> 1
-		}
+		protected override void UpdateValues() { }
 	}
 
 	/// <summary>

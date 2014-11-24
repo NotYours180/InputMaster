@@ -51,6 +51,7 @@ namespace BSGTools.IO {
 	/// </code>
 	[Serializable]
 	public abstract class Control {
+		public Guid guid { get; private set; }
 
 		/// <value>
 		/// The current "down" state of the control.
@@ -138,6 +139,7 @@ namespace BSGTools.IO {
 		protected float RealValue { get; set; }
 
 		protected Control() {
+			guid = Guid.NewGuid();
 			Sensitivity = 1f;
 			Gravity = 1f;
 			Dead = 0f;
@@ -171,41 +173,6 @@ namespace BSGTools.IO {
 		}
 
 		/// <summary>
-		/// Returns debug information in a single line.
-		/// </summary>
-		/// <returns>The debug information.</returns>
-		public override string ToString() {
-			return ToStringBlock().Replace(Environment.NewLine, " ");
-		}
-
-		/// <summary>
-		/// Returns debug information as a formatted string block.
-		/// </summary>
-		/// <returns>The debug information.</returns>
-		public virtual string ToStringBlock() {
-			var sb = new StringBuilder();
-
-			sb.AppendLine(Name);
-			sb.AppendLine(string.Format("D: {0}", Down));
-			sb.AppendLine(string.Format("H: {0}", Held));
-			sb.AppendLine(string.Format("U: {0}", Up));
-
-			sb.AppendLine(string.Format("RV: {0}", RealValue));
-			sb.AppendLine(string.Format("FV: {0}", FixedValue));
-			sb.AppendLine(string.Format("V: {0}", Value));
-
-			sb.AppendLine(string.Format("B: {0}", IsBlocked));
-			sb.AppendLine(string.Format("I: {0}", Invert));
-			sb.AppendLine(string.Format("Sn: {0}", Snap));
-
-			sb.AppendLine(string.Format("G: {0}", Gravity));
-			sb.AppendLine(string.Format("Se: {0}", Sensitivity));
-			sb.AppendLine(string.Format("D: {0}", Dead));
-
-			return sb.ToString().Trim();
-		}
-
-		/// <summary>
 		/// Updates the control.
 		/// This should never be used by any user-made script.
 		/// This is public specifically for the use of <see cref="InputMaster"/>.
@@ -220,7 +187,7 @@ namespace BSGTools.IO {
 		/// <summary>
 		/// Internally used for maintaining the <see cref="RealValue"/> inbetween updates while resetting everything else.
 		/// </summary>
-		protected void SoftReset() {
+		void SoftReset() {
 			var realVal = RealValue;
 			Reset();
 			RealValue = realVal;
@@ -359,15 +326,6 @@ namespace BSGTools.IO {
 			this.Negative = negative;
 		}
 
-		public override string ToStringBlock() {
-			var sb = new StringBuilder();
-			sb.AppendLine("PositiveKey: " + Positive);
-			sb.AppendLine("NegativeKey: " + Negative);
-			sb.AppendLine("Modifier: " + Modifier.DisplayName);
-			sb.AppendLine(base.ToStringBlock());
-			return sb.ToString().Trim();
-		}
-
 		/// <summary>
 		/// Updates the current states of this control.
 		/// </summary>
@@ -396,7 +354,7 @@ namespace BSGTools.IO {
 			if(Input.GetKeyUp(pos))
 				Up |= ControlState.Positive;
 
-			if(Negative != null) {
+			if(Negative != KeyCode.None) {
 				if(Input.GetKey(neg))
 					Held |= ControlState.Negative;
 				if(Input.GetKeyUp(neg))

@@ -139,6 +139,11 @@ namespace BSGTools.IO {
 		}
 		#endregion
 
+		public void SetBlockedAll(bool blocked) {
+			foreach(var c in Controls)
+				c.IsBlocked = blocked;
+		}
+
 		/// <value>
 		/// The combined Controls.
 		/// </value>

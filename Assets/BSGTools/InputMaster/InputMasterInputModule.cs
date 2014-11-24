@@ -248,25 +248,28 @@ namespace BSGTools.IO {
 			var pressed = mouseData.AnyPressesThisFrame();
 			var released = mouseData.AnyReleasesThisFrame();
 
-			var leftButtonData = mouseData[PointerEventData.InputButton.Left];
+			var leftButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Left);
 
-			if(!UseMouse(pressed, released, leftButtonData.buttonData))
+			if(!UseMouse(pressed, released, leftButtonData.eventData.buttonData))
 				return;
 
 			// Process the first mouse button fully
-			ProcessMousePress(leftButtonData);
-			ProcessMove(leftButtonData.buttonData);
-			ProcessDrag(leftButtonData.buttonData);
+			ProcessMousePress(leftButtonData.eventData);
+			ProcessMove(leftButtonData.eventData.buttonData);
+			ProcessDrag(leftButtonData.eventData.buttonData);
+
+			var rightButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Right);
+			var middleButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Middle);
 
 			// Now process right / middle clicks
-			ProcessMousePress(mouseData[PointerEventData.InputButton.Right]);
-			ProcessDrag(mouseData[PointerEventData.InputButton.Right].buttonData);
-			ProcessMousePress(mouseData[PointerEventData.InputButton.Middle]);
-			ProcessDrag(mouseData[PointerEventData.InputButton.Middle].buttonData);
+			ProcessMousePress(rightButtonData.eventData);
+			ProcessDrag(rightButtonData.eventData.buttonData);
+			ProcessMousePress(middleButtonData.eventData);
+			ProcessDrag(middleButtonData.eventData.buttonData);
 
-			if(!Mathf.Approximately(leftButtonData.buttonData.scrollDelta.sqrMagnitude, 0.0f)) {
-				var scrollHandler = ExecuteEvents.GetEventHandler<IScrollHandler>(leftButtonData.buttonData.pointerCurrentRaycast.gameObject);
-				ExecuteEvents.ExecuteHierarchy(scrollHandler, leftButtonData.buttonData, ExecuteEvents.scrollHandler);
+			if(!Mathf.Approximately(leftButtonData.eventData.buttonData.scrollDelta.sqrMagnitude, 0.0f)) {
+				var scrollHandler = ExecuteEvents.GetEventHandler<IScrollHandler>(leftButtonData.eventData.buttonData.pointerCurrentRaycast.gameObject);
+				ExecuteEvents.ExecuteHierarchy(scrollHandler, leftButtonData.eventData.buttonData, ExecuteEvents.scrollHandler);
 			}
 		}
 
