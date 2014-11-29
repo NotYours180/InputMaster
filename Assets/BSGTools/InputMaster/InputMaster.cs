@@ -115,10 +115,10 @@ namespace BSGTools.IO {
 		/// </value>
 		public float MouseYRaw { get; private set; }
 
-		public CombinedOutput coUIHorizontalAxis { get; set; }
-		public CombinedOutput coUIVerticalAxis { get; set; }
-		public CombinedOutput coUISubmitButton { get; set; }
-		public CombinedOutput coUICancelButton { get; set; }
+		public CombinedOutput coUIHorizontal { get; set; }
+		public CombinedOutput coUIVertical { get; set; }
+		public CombinedOutput coUISubmit { get; set; }
+		public CombinedOutput coUICancel { get; set; }
 
 		/// <summary>
 		/// Uses reflection to get all controls in a class.
@@ -282,10 +282,10 @@ namespace BSGTools.IO {
 			if(im == null)
 				return;
 
-			im.horizontalAxis = coUIHorizontalAxis;
-			im.verticalAxis = coUIVerticalAxis;
-			im.submitButton = coUISubmitButton;
-			im.cancelButton = coUICancelButton;
+			im.coUIHorizontal = coUIHorizontal;
+			im.coUIVertical = coUIVertical;
+			im.coUISubmit = coUISubmit;
+			im.coUICancel = coUICancel;
 #endif
 		}
 

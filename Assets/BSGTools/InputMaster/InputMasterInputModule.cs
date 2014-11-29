@@ -1,16 +1,13 @@
-﻿#if UNITY_4_6
-using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace BSGTools.IO {
-	[AddComponentMenu("InputMaster/UI/Input Master Standalone Input Module")]
 	public class InputMasterInputModule : PointerInputModule {
 		private float m_NextAction;
 
-		private InputMode m_CurrentInputMode = InputMode.Buttons;
+		private InputMode m_CurrentInputMode = InputMode.Mouse;
 
 		private Vector2 m_LastMousePosition;
 		private Vector2 m_MousePosition;
@@ -26,22 +23,7 @@ namespace BSGTools.IO {
 			get { return m_CurrentInputMode; }
 		}
 
-		private CombinedOutput m_HorizontalAxis;
-
-		/// <summary>
-		/// Name of the vertical axis for movement (if axis events are used).
-		/// </summary>
-		private CombinedOutput m_VerticalAxis;
-
-		/// <summary>
-		/// Name of the submit button.
-		/// </summary>
-		private CombinedOutput m_SubmitButton;
-
-		/// <summary>
-		/// Name of the submit button.
-		/// </summary>
-		private CombinedOutput m_CancelButton;
+		public CombinedOutput coUIHorizontal, coUIVertical, coUISubmit, coUICancel;
 
 		[SerializeField]
 		private float m_InputActionsPerSecond = 10;
@@ -59,49 +41,28 @@ namespace BSGTools.IO {
 			set { m_InputActionsPerSecond = value; }
 		}
 
-		/// <summary>
-		/// Name of the horizontal axis for movement (if axis events are used).
-		/// </summary>
-		public CombinedOutput horizontalAxis {
-			get { return m_HorizontalAxis; }
-			set { m_HorizontalAxis = value; }
-		}
-
-		/// <summary>
-		/// Name of the vertical axis for movement (if axis events are used).
-		/// </summary>
-		public CombinedOutput verticalAxis {
-			get { return m_VerticalAxis; }
-			set { m_VerticalAxis = value; }
-		}
-
-		public CombinedOutput submitButton {
-			get { return m_SubmitButton; }
-			set { m_SubmitButton = value; }
-		}
-
-		public CombinedOutput cancelButton {
-			get { return m_CancelButton; }
-			set { m_CancelButton = value; }
-		}
-
 		public override void UpdateModule() {
 			m_LastMousePosition = m_MousePosition;
 			m_MousePosition = Input.mousePosition;
 		}
 
 		public override bool IsModuleSupported() {
-			return m_AllowActivationOnMobileDevice || !Application.isMobilePlatform;
+			// Check for mouse presence instead of whether touch is supported,
+			// as you can connect mouse to a tablet and in that case we'd want
+			// to use StandaloneInputModule for non-touch input events.
+			return m_AllowActivationOnMobileDevice || Input.mousePresent;
 		}
 
 		public override bool ShouldActivateModule() {
 			if(!base.ShouldActivateModule())
 				return false;
+			if(coUISubmit == null || coUICancel == null || coUIHorizontal == null || coUIVertical == null)
+				return false;
 
-			var shouldActivate = m_SubmitButton.AnyDownPositive;
-			shouldActivate |= m_CancelButton.AnyDownPositive;
-			shouldActivate |= !Mathf.Approximately(m_HorizontalAxis.FixedValue, 0.0f);
-			shouldActivate |= !Mathf.Approximately(m_VerticalAxis.FixedValue, 0.0f);
+			var shouldActivate = coUISubmit.FixedValue != 0;
+			shouldActivate |= coUICancel.FixedValue != 0;
+			shouldActivate |= !Mathf.Approximately(coUIHorizontal.Value, 0.0f);
+			shouldActivate |= !Mathf.Approximately(coUIVertical.Value, 0.0f);
 			shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
 			shouldActivate |= Input.GetMouseButtonDown(0);
 			return shouldActivate;
@@ -149,38 +110,25 @@ namespace BSGTools.IO {
 				return false;
 
 			var data = GetBaseEventData();
-			if(m_SubmitButton.AnyDownPositive)
+			if(coUISubmit.FixedValue != 0)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.submitHandler);
 
-			if(m_CancelButton.AnyDownPositive)
+			if(coUICancel.FixedValue != 0)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.cancelHandler);
 			return data.used;
 		}
 
 		private bool AllowMoveEventProcessing(float time) {
-			bool allow = m_HorizontalAxis.AnyDownPositive;
-			allow |= m_VerticalAxis.AnyDownPositive;
+			bool allow = coUIHorizontal.FixedValue != 0;
+			allow |= coUIVertical.FixedValue != 0;
 			allow |= (time > m_NextAction);
 			return allow;
 		}
 
 		private Vector2 GetRawMoveVector() {
 			Vector2 move = Vector2.zero;
-			move.x = m_HorizontalAxis.FixedValue;
-			move.y = m_VerticalAxis.FixedValue;
-
-			if(m_HorizontalAxis.AnyDownPositive) {
-				if(move.x < 0)
-					move.x = -1f;
-				if(move.x > 0)
-					move.x = 1f;
-			}
-			if(m_VerticalAxis.AnyDownPositive) {
-				if(move.y < 0)
-					move.y = -1f;
-				if(move.y > 0)
-					move.y = 1f;
-			}
+			move.x = coUIHorizontal.FixedValueF;
+			move.y = coUIVertical.FixedValueF;
 			return move;
 		}
 
@@ -194,7 +142,7 @@ namespace BSGTools.IO {
 				return false;
 
 			Vector2 movement = GetRawMoveVector();
-			//Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
+			// Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
 			var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
 			if(!Mathf.Approximately(axisEventData.moveVector.x, 0f)
 				|| !Mathf.Approximately(axisEventData.moveVector.y, 0f)) {
@@ -224,7 +172,7 @@ namespace BSGTools.IO {
 			HandlePointerExitAndEnter(lastMousePointer, null);
 			eventSystem.SetSelectedGameObject(null, baseEventData);
 
-			// if we were hovering something... 
+			// if we were hovering something...
 			// use this as the basis for the selection
 			bool resetSelection = false;
 			GameObject toSelect = ExecuteEvents.GetEventHandler<ISelectHandler>(hoveredObject);
@@ -248,28 +196,25 @@ namespace BSGTools.IO {
 			var pressed = mouseData.AnyPressesThisFrame();
 			var released = mouseData.AnyReleasesThisFrame();
 
-			var leftButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Left);
+			var leftButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Left).eventData;
 
-			if(!UseMouse(pressed, released, leftButtonData.eventData.buttonData))
+			if(!UseMouse(pressed, released, leftButtonData.buttonData))
 				return;
 
 			// Process the first mouse button fully
-			ProcessMousePress(leftButtonData.eventData);
-			ProcessMove(leftButtonData.eventData.buttonData);
-			ProcessDrag(leftButtonData.eventData.buttonData);
-
-			var rightButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Right);
-			var middleButtonData = mouseData.GetButtonState(PointerEventData.InputButton.Middle);
+			ProcessMousePress(leftButtonData);
+			ProcessMove(leftButtonData.buttonData);
+			ProcessDrag(leftButtonData.buttonData);
 
 			// Now process right / middle clicks
-			ProcessMousePress(rightButtonData.eventData);
-			ProcessDrag(rightButtonData.eventData.buttonData);
-			ProcessMousePress(middleButtonData.eventData);
-			ProcessDrag(middleButtonData.eventData.buttonData);
+			ProcessMousePress(mouseData.GetButtonState(PointerEventData.InputButton.Right).eventData);
+			ProcessDrag(mouseData.GetButtonState(PointerEventData.InputButton.Right).eventData.buttonData);
+			ProcessMousePress(mouseData.GetButtonState(PointerEventData.InputButton.Middle).eventData);
+			ProcessDrag(mouseData.GetButtonState(PointerEventData.InputButton.Middle).eventData.buttonData);
 
-			if(!Mathf.Approximately(leftButtonData.eventData.buttonData.scrollDelta.sqrMagnitude, 0.0f)) {
-				var scrollHandler = ExecuteEvents.GetEventHandler<IScrollHandler>(leftButtonData.eventData.buttonData.pointerCurrentRaycast.gameObject);
-				ExecuteEvents.ExecuteHierarchy(scrollHandler, leftButtonData.eventData.buttonData, ExecuteEvents.scrollHandler);
+			if(!Mathf.Approximately(leftButtonData.buttonData.scrollDelta.sqrMagnitude, 0.0f)) {
+				var scrollHandler = ExecuteEvents.GetEventHandler<IScrollHandler>(leftButtonData.buttonData.pointerCurrentRaycast.gameObject);
+				ExecuteEvents.ExecuteHierarchy(scrollHandler, leftButtonData.buttonData, ExecuteEvents.scrollHandler);
 			}
 		}
 
@@ -278,7 +223,7 @@ namespace BSGTools.IO {
 				return true;
 
 			// On mouse action switch back to mouse control scheme
-			if(pressed || released || pointerData.IsPointerMoving() || pointerData.IsScrolling()) {
+			if(pressed || released) {
 				m_CurrentInputMode = InputMode.Mouse;
 				eventSystem.SetSelectedGameObject(null);
 			}
@@ -307,11 +252,14 @@ namespace BSGTools.IO {
 				pointerEvent.eligibleForClick = true;
 				pointerEvent.delta = Vector2.zero;
 				pointerEvent.dragging = false;
+				pointerEvent.useDragThreshold = true;
 				pointerEvent.pressPosition = pointerEvent.position;
 				pointerEvent.pointerPressRaycast = pointerEvent.pointerCurrentRaycast;
 
+				DeselectIfSelectionChanged(currentOverGo, pointerEvent);
+
 				// search for the control that will receive the press
-				// if we can't find a press handler set the press 
+				// if we can't find a press handler set the press
 				// handler to be what would receive a click.
 				var newPressed = ExecuteEvents.ExecuteHierarchy(currentOverGo, pointerEvent, ExecuteEvents.pointerDownHandler);
 
@@ -319,7 +267,7 @@ namespace BSGTools.IO {
 				if(newPressed == null)
 					newPressed = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentOverGo);
 
-				//Debug.Log("Pressed: " + newPressed);
+				// Debug.Log("Pressed: " + newPressed);
 
 				float time = Time.unscaledTime;
 
@@ -346,20 +294,14 @@ namespace BSGTools.IO {
 
 				if(pointerEvent.pointerDrag != null)
 					ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.initializePotentialDrag);
-
-				//	Debug.Log("Setting Drag Handler to: " + pointer.pointerDrag);
-
-				// Selection tracking
-				var selectHandlerGO = ExecuteEvents.GetEventHandler<ISelectHandler>(currentOverGo);
-				eventSystem.SetSelectedGameObject(selectHandlerGO, pointerEvent);
 			}
 
 			// PointerUp notification
 			if(data.ReleasedThisFrame()) {
-				//Debug.Log("Executing pressup on: " + pointer.pointerPress);
+				// Debug.Log("Executing pressup on: " + pointer.pointerPress);
 				ExecuteEvents.Execute(pointerEvent.pointerPress, pointerEvent, ExecuteEvents.pointerUpHandler);
 
-				//Debug.Log("KeyCode: " + pointer.eventData.keyCode);
+				// Debug.Log("KeyCode: " + pointer.eventData.keyCode);
 
 				// see if we mouse up on the same element that we clicked on...
 				var pointerUpHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentOverGo);
@@ -394,4 +336,3 @@ namespace BSGTools.IO {
 		}
 	}
 }
-#endif
