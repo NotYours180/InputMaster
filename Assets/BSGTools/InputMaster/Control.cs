@@ -54,7 +54,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// A required, unique identifiers.
 		/// </value>
-		public string identifier;
+		public string identifier = "new_" + Guid.NewGuid().ToString().ToUpper().Split('-')[0];
 
 		/// <value>
 		/// The current "down" state of the control.
@@ -108,7 +108,7 @@ namespace BSGTools.IO {
 		/// Used to specify controls that automatically
 		/// only work in the Editor or in Debug builds.
 		/// </value>
-		public bool debugControl = false;
+		public bool debugOnly = false;
 
 
 		/// <value>

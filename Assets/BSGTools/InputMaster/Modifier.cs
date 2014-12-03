@@ -22,6 +22,10 @@ namespace BSGTools.IO {
 	/// Represents a Modifier for a control.
 	/// </summary>
 	public sealed class ModifierKey {
+		/// <summary>
+		/// Default Modifier for KeyControls with no modifier.
+		/// </summary>
+		public static readonly ModifierKey None = new ModifierKey(KeyCode.None, "None");
 
 		/// <summary>
 		/// The Left Alt modifier key.
@@ -47,28 +51,6 @@ namespace BSGTools.IO {
 		/// The Left Windows modifier key.
 		/// </summary>
 		public static readonly ModifierKey LWindows = new ModifierKey(KeyCode.LeftWindows, "Left Windows");
-
-		/// <summary>
-		/// Can be used for listing.
-		/// </summary>
-		public static readonly ModifierKey[] modifiers = new ModifierKey[]{
-		None,
-		LShift,
-		LCtrl,
-		LAlt,
-		LWindows,
-		LCommand,
-		RShift,
-		RCtrl,
-		RAlt,
-		RWindows,
-		RCommand,
-	};
-
-		/// <summary>
-		/// Default Modifier for KeyControls with no modifier.
-		/// </summary>
-		public static readonly ModifierKey None = new ModifierKey(KeyCode.None, "None");
 
 		/// <summary>
 		/// The Right Alt modifier key.
@@ -119,54 +101,67 @@ namespace BSGTools.IO {
 			switch(me) {
 				case ModEnums.None:
 					return None;
-
 				case ModEnums.LShift:
 					return LShift;
-
 				case ModEnums.LCtrl:
 					return LCtrl;
-
 				case ModEnums.LAlt:
 					return LAlt;
-
 				case ModEnums.LWindows:
 					return LWindows;
-
 				case ModEnums.LCommand:
 					return LCommand;
-
 				case ModEnums.RShift:
 					return RShift;
-
 				case ModEnums.RCtrl:
 					return RCtrl;
-
 				case ModEnums.RAlt:
 					return RAlt;
-
 				case ModEnums.RWindows:
 					return RWindows;
-
 				case ModEnums.RCommand:
 					return RCommand;
-
 				default:
 					throw new ArgumentException();
 			}
 		}
 
 		/// <summary>
+		/// Utility method for listing purposes.
+		/// </summary>
+		/// <param name="mk">The <see cref="ModEnums"/> to convert.</param>
+		/// <returns>The proper static modifier.</returns>
+		public static ModEnums ToMEnum(ModifierKey mk) {
+			if(mk == ModifierKey.LAlt)
+				return ModEnums.LAlt;
+			else if(mk == ModifierKey.LCommand)
+				return ModEnums.LCommand;
+			else if(mk == ModifierKey.LCtrl)
+				return ModEnums.LCtrl;
+			else if(mk == ModifierKey.LShift)
+				return ModEnums.LShift;
+			else if(mk == ModifierKey.LWindows)
+				return ModEnums.LWindows;
+			else if(mk == ModifierKey.RAlt)
+				return ModEnums.RAlt;
+			else if(mk == ModifierKey.RCommand)
+				return ModEnums.RCommand;
+			else if(mk == ModifierKey.RCtrl)
+				return ModEnums.RCtrl;
+			else if(mk == ModifierKey.RShift)
+				return ModEnums.RShift;
+			else if(mk == ModifierKey.RWindows)
+				return ModEnums.RWindows;
+			else
+				return ModEnums.None;
+		}
+
+
+		/// <summary>
 		/// Assists in checking key status.
 		/// </summary>
 		public static implicit operator KeyCode(ModifierKey modifier) {
 			return modifier.UKeyCode;
-		}
-
-		/// <summary>
-		/// Utility operator overload for listing purposes.
-		/// </summary>
-		public static implicit operator ModifierKey(ModEnums modifier) {
-			return FromMEnum(modifier);
 		}
 
 		/// <summary>

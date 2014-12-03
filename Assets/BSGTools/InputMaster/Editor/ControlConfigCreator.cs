@@ -4,7 +4,7 @@ using UnityEditor;
 using BSGTools.IO;
 using BSGTools.IO.Xbox;
 
-namespace BSGTools.Editor {
+namespace BSGTools.Editors {
 	public class ControlConfigCreator : MonoBehaviour {
 
 		[MenuItem("BSGTools/InputMaster/Create New StandaloneControlConfig")]

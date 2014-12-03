@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using System;
 
 namespace BSGTools.IO {
 	public class StandaloneControlConfig : ScriptableObject {
-		public StandaloneControl[] standaloneControls;
+		public List<StandaloneControl> standaloneControls;
 	}
 }

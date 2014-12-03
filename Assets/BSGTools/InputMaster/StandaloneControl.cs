@@ -5,23 +5,24 @@
 using System;
 using BSGTools.IO;
 using UnityEngine;
+
 [Serializable]
 public sealed class StandaloneControl : Control {
 	/// <value>
 	/// The REQUIRED positive binding for this control.
 	/// CANNOT BE KeyCode.None!
 	/// </value>
-	public KeyCode positive;
+	public KeyCode positive = KeyCode.A;
 
 	/// <value>
 	/// The OPTIONAL negative binding for this control.
 	/// </value>
-	public KeyCode negative;
+	public KeyCode negative = KeyCode.None;
 
 	/// <value>
 	/// The OPTIONAL modifier key for this control.
 	/// </value>
-	public ModifierKey modifier;
+	public ModifierKey modifier = ModifierKey.None;
 
 
 
@@ -34,10 +35,6 @@ public sealed class StandaloneControl : Control {
 		: base() {
 		if(positive == KeyCode.None)
 			throw new ArgumentException("Positive must != KeyCode.None");
-
-		this.positive = positive;
-		this.negative = KeyCode.None;
-		this.modifier = ModifierKey.None;
 	}
 
 	/// <summary>

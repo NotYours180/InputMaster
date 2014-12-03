@@ -260,7 +260,7 @@ namespace BSGTools.IO {
 			anyControlUp = false;
 
 			foreach(var c in controls) {
-				if((c.debugControl && Debug.isDebugBuild) || c.debugControl == false) {
+				if((c.debugOnly && Debug.isDebugBuild) || c.debugOnly == false) {
 					c.Update();
 
 					if(c.Down.HasFlag(ControlState.Either))
