@@ -36,7 +36,7 @@ namespace BSGTools.IO {
 			get {
 				float total = 0f;
 				foreach(var c in Controls)
-					total += c.FixedValue;
+					total += c.fixedValue;
 
 				float post = 0f;
 				float postClamped = 0f;
@@ -55,7 +55,7 @@ namespace BSGTools.IO {
 			get {
 				float total = 0f;
 				foreach(var c in Controls)
-					total += c.FixedValue;
+					total += c.fixedValue;
 
 				float post = 0f;
 				float postClamped = 0f;
@@ -74,7 +74,7 @@ namespace BSGTools.IO {
 			get {
 				float total = 0f;
 				foreach(var c in Controls)
-					total += c.Value;
+					total += c.value;
 
 				float post = 0f;
 				float postClamped = 0f;
@@ -141,7 +141,7 @@ namespace BSGTools.IO {
 
 		public void SetBlockedAll(bool blocked) {
 			foreach(var c in Controls)
-				c.IsBlocked = blocked;
+				c.blocked = blocked;
 		}
 
 		/// <value>

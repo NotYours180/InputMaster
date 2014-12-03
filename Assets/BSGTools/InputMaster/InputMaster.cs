@@ -53,67 +53,67 @@ namespace BSGTools.IO {
 	[DisallowMultipleComponent]
 	public class InputMaster : MonoBehaviour {
 
-		Control[] controls;
+		[Header("Base Configurations")]
+		public StandaloneControlConfig standaloneControls;
+		public XboxControlConfig xboxControls;
+
+		public Control[] controls;
 
 		/// <value>
 		/// Are any controls in an active Down state?
 		/// </value>
-		public bool AnyControlDown { get; private set; }
-
+		public bool anyControlDown { get; private set; }
 		/// <value>
 		/// Are any controls in an active Held state?
 		/// </value>
-		public bool AnyControlHeld { get; private set; }
-
+		public bool anyControlHeld { get; private set; }
 		/// <value>
 		/// Are any controls in an active Up state?
 		/// </value>
-		public bool AnyControlUp { get; private set; }
+		public bool anyControlUp { get; private set; }
 
-		/// <value>
-		/// The MouseWheel Axis axis value from Unity's native Input system.
-		/// </value>
-		public float MouseWheel { get; private set; }
-
-		/// <value>
-		/// The MouseWheel Axis axis name in Unity's Input Manager
-		/// </value>
-		public string MouseWheelAxisName { get; set; }
-
-		/// <value>
-		/// The MouseWheel Axis raw axis value from Unity's native Input system.
-		/// </value>
-		public float MouseWheelRaw { get; private set; }
-
-		/// <value>
-		/// The Mouse X Axis axis value from Unity's native Input system.
-		/// </value>
-		public float MouseX { get; private set; }
 
 		/// <value>
 		/// The Mouse X Axis axis name in Unity's Input Manager
 		/// </value>
-		public string MouseXAxisName { get; set; }
-
+		[SerializeField, Header("Mouse Axes")]
+		string mouseXAxisName;
+		/// <value>
+		/// The Mouse X Axis axis value from Unity's native Input system.
+		/// </value>
+		public float mouseX { get; private set; }
 		/// <value>
 		/// The Mouse X Axis raw axis value from Unity's native Input system.
 		/// </value>
-		public float MouseXRaw { get; private set; }
-
-		/// <value>
-		/// The Mouse Y Axis axis value from Unity's native Input system.
-		/// </value>
-		public float MouseY { get; private set; }
+		public float mouseXRaw { get; private set; }
 
 		/// <value>
 		/// The Mouse Y Axis axis name in Unity's Input Manager
 		/// </value>
-		public string MouseYAxisName { get; set; }
-
+		[SerializeField]
+		string mouseYAxisName;
+		/// <value>
+		/// The Mouse Y Axis axis value from Unity's native Input system.
+		/// </value>
+		public float mouseY { get; private set; }
 		/// <value>
 		/// The Mouse Y Axis raw axis value from Unity's native Input system.
 		/// </value>
-		public float MouseYRaw { get; private set; }
+		public float mouseYRaw { get; private set; }
+
+		/// <value>
+		/// The MouseWheel Axis axis name in Unity's Input Manager
+		/// </value>
+		[SerializeField]
+		string mouseWheelAxisName;
+		/// <value>
+		/// The MouseWheel Axis axis value from Unity's native Input system.
+		/// </value>
+		public float mouseWheel { get; private set; }
+		/// <value>
+		/// The MouseWheel Axis raw axis value from Unity's native Input system.
+		/// </value>
+		public float mouseWheelRaw { get; private set; }
 
 		public CombinedOutput coUIHorizontal { get; set; }
 		public CombinedOutput coUIVertical { get; set; }
@@ -166,10 +166,10 @@ namespace BSGTools.IO {
 		/// This has the side effect of resetting all control states.
 		/// </summary>
 		/// <param name="blocked">To block/unblock.</param>
-		/// <seealso cref="Control.IsBlocked"/>
+		/// <seealso cref="Control.blocked"/>
 		public void SetBlockAll(bool blocked) {
 			foreach(var c in controls)
-				c.IsBlocked = blocked;
+				c.blocked = blocked;
 		}
 
 		///// <summary>
@@ -233,7 +233,7 @@ namespace BSGTools.IO {
 
 #endif
 
-		private void Update() {
+		void Update() {
 #if XBOX_ALLOWED
 			XboxUtils.UpdateStates();
 #endif
@@ -242,33 +242,33 @@ namespace BSGTools.IO {
 			UpdateInputModule();
 #endif
 
-			if(string.IsNullOrEmpty(MouseXAxisName) == false) {
-				MouseX = Input.GetAxis(MouseXAxisName);
-				MouseXRaw = Input.GetAxisRaw(MouseXAxisName);
+			if(string.IsNullOrEmpty(mouseXAxisName) == false) {
+				mouseX = Input.GetAxis(mouseXAxisName);
+				mouseXRaw = Input.GetAxisRaw(mouseXAxisName);
 			}
-			if(string.IsNullOrEmpty(MouseYAxisName) == false) {
-				MouseY = Input.GetAxis(MouseYAxisName);
-				MouseYRaw = Input.GetAxisRaw(MouseYAxisName);
+			if(string.IsNullOrEmpty(mouseYAxisName) == false) {
+				mouseY = Input.GetAxis(mouseYAxisName);
+				mouseYRaw = Input.GetAxisRaw(mouseYAxisName);
 			}
-			if(string.IsNullOrEmpty(MouseWheelAxisName) == false) {
-				MouseWheel = Input.GetAxis(MouseWheelAxisName);
-				MouseWheelRaw = Input.GetAxisRaw(MouseWheelAxisName);
+			if(string.IsNullOrEmpty(mouseWheelAxisName) == false) {
+				mouseWheel = Input.GetAxis(mouseWheelAxisName);
+				mouseWheelRaw = Input.GetAxisRaw(mouseWheelAxisName);
 			}
 
-			AnyControlDown = false;
-			AnyControlHeld = false;
-			AnyControlUp = false;
+			anyControlDown = false;
+			anyControlHeld = false;
+			anyControlUp = false;
 
 			foreach(var c in controls) {
-				if((c.IsDebugControl && Debug.isDebugBuild) || c.IsDebugControl == false) {
+				if((c.debugControl && Debug.isDebugBuild) || c.debugControl == false) {
 					c.Update();
 
 					if(c.Down.HasFlag(ControlState.Either))
-						AnyControlDown = true;
+						anyControlDown = true;
 					if(c.Held.HasFlag(ControlState.Either))
-						AnyControlHeld = true;
+						anyControlHeld = true;
 					if(c.Up.HasFlag(ControlState.Either))
-						AnyControlUp = true;
+						anyControlUp = true;
 				}
 			}
 		}
