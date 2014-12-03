@@ -29,15 +29,15 @@ using UnityEngine;
 namespace BSGTools.IO.Tools {
 
 	public class InputManagerWizard : EditorWindow {
-		private const string INPUT_MASTER_LOCATION = "/BSGTools/InputMaster/AutoGenTemplates/";
-		private const string KEYCONTROL_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "KeyControlTemplate.txt";
-		private const string MASTER_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "InputManagerTemplate.txt";
-		private const string XBUTTONCONTROL_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "XButtonControlTemplate.txt";
-		private const string XBUTTONCONTROLMULTI_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "XButtonControlTemplateMulti.txt";
-		private const string XSTICKCONTROL_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "XStickControlTemplate.txt";
-		private const string XSTICKCONTROLMULTI_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "XStickControlTemplateMulti.txt";
-		private const string XTRIGGERCONTROL_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "XTriggerControlTemplate.txt";
-		private const string XTRIGGERCONTROLMULTI_TEMPLATE_LOCATION = INPUT_MASTER_LOCATION + "XTriggerControlTemplateMulti.txt";
+		private const string TEMPLATES = "/BSGTools/InputMaster/AutoGenTemplates/";
+		private const string KEYCONTROL_TEMPLATE_LOCATION = TEMPLATES + "KeyControlTemplate.txt";
+		private const string MASTER_TEMPLATE_LOCATION = TEMPLATES + "InputManagerTemplate.txt";
+		private const string XBUTTONCONTROL_TEMPLATE_LOCATION = TEMPLATES + "XButtonControlTemplate.txt";
+		private const string XBUTTONCONTROLMULTI_TEMPLATE_LOCATION = TEMPLATES + "XButtonControlTemplateMulti.txt";
+		private const string XSTICKCONTROL_TEMPLATE_LOCATION = TEMPLATES + "XStickControlTemplate.txt";
+		private const string XSTICKCONTROLMULTI_TEMPLATE_LOCATION = TEMPLATES + "XStickControlTemplateMulti.txt";
+		private const string XTRIGGERCONTROL_TEMPLATE_LOCATION = TEMPLATES + "XTriggerControlTemplate.txt";
+		private const string XTRIGGERCONTROLMULTI_TEMPLATE_LOCATION = TEMPLATES + "XTriggerControlTemplateMulti.txt";
 		private static readonly string[] reserved = { "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface", "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while" };
 
 		private FieldInfo[] _modFields = null;
@@ -56,7 +56,7 @@ namespace BSGTools.IO.Tools {
 
 		[MenuItem("Assets/Create/BSGTools/InputMaster/Create InputManager")]
 		public static void ShowWizard() {
-			var wizard = EditorWindow.GetWindow<InputManagerWizard>(true, "InputManager Generator");
+			EditorWindow.GetWindow<InputManagerWizard>(true, "InputManager Generator");
 		}
 
 		private void CreateInputManager() {
