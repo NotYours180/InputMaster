@@ -92,7 +92,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyDownPositive {
 			get {
-				return Controls.Any(c => c.Down == ControlState.Positive);
+				return Controls.Any(c => c.down == ControlState.Positive);
 			}
 		}
 		/// <value>
@@ -100,7 +100,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyDownNegative {
 			get {
-				return Controls.Any(c => c.Down == ControlState.Negative);
+				return Controls.Any(c => c.down == ControlState.Negative);
 			}
 		}
 
@@ -109,7 +109,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyHeldPositive {
 			get {
-				return Controls.Any(c => c.Held == ControlState.Positive);
+				return Controls.Any(c => c.held == ControlState.Positive);
 			}
 		}
 		/// <value>
@@ -117,7 +117,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyHeldNegative {
 			get {
-				return Controls.Any(c => c.Held == ControlState.Negative);
+				return Controls.Any(c => c.held == ControlState.Negative);
 			}
 		}
 
@@ -126,7 +126,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyUpPositive {
 			get {
-				return Controls.Any(c => c.Up == ControlState.Positive);
+				return Controls.Any(c => c.up == ControlState.Positive);
 			}
 		}
 		/// <value>
@@ -134,7 +134,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyUpNegative {
 			get {
-				return Controls.Any(c => c.Up == ControlState.Negative);
+				return Controls.Any(c => c.up == ControlState.Negative);
 			}
 		}
 		#endregion

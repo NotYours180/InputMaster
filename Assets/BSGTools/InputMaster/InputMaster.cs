@@ -16,7 +16,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
 #endif
-#if UNITY_4_6
+#if UNITY_4_6 || UNITY_5
+#define NEW_UI
 using UnityEngine.EventSystems;
 #endif
 
@@ -54,10 +55,8 @@ namespace BSGTools.IO {
 	public class InputMaster : MonoBehaviour {
 
 		[Header("Base Configurations")]
-		public StandaloneControlConfig standaloneControls;
-		public XboxControlConfig xboxControls;
-
-		public Control[] controls;
+		public StandaloneControlConfig standaloneConfig;
+		public XboxControlConfig xboxConfig;
 
 		/// <value>
 		/// Are any controls in an active Down state?
@@ -121,43 +120,17 @@ namespace BSGTools.IO {
 		public CombinedOutput coUICancel { get; set; }
 
 		/// <summary>
-		/// Uses reflection to get all controls in a class.
-		/// Depending on the control count from your controlClass,
-		/// this could have a noticable performance spike unless used during loading.
-		/// </summary>
-		/// <param name="controlClass">The instance of a class to get the controls from.</param>
-		/// <returns>The new InputMaster instance.</returns>
-		public static InputMaster CreateMaster(object controlClass) {
-			return CreateMaster(GetAllControls(controlClass));
-		}
-
-		/// <summary>
-		/// Creates a new, empty, hidden GameObject, adds a new instance of InputMaster to it,
-		/// and adds the provided controls to the master's control list.
-		/// </summary>
-		/// <param name="controls">A full listing of all of the games controls with the default bindings.</param>
-		/// <returns>The new InputMaster instance.</returns>
-		public static InputMaster CreateMaster(params Control[] controls) {
-			var parent = new GameObject("_InputMaster");
-			DontDestroyOnLoad(parent);
-			var master = parent.AddComponent<InputMaster>();
-			master.controls = controls;
-			return master;
-		}
-
-		/// <summary>
-		/// Destroys the InputMaster object.
-		/// </summary>
-		public void DestroyMaster() {
-			Destroy(gameObject);
-		}
-
-		/// <summary>
 		/// Resets all states/values on all controls.
 		/// </summary>
 		/// <seealso cref="ResetAll(bool)"/>
 		public void ResetAll() {
-			foreach(var c in controls)
+			foreach(var c in standaloneConfig.controls)
+				c.Reset();
+			foreach(var c in xboxConfig.xbControls)
+				c.Reset();
+			foreach(var c in xboxConfig.xsControls)
+				c.Reset();
+			foreach(var c in xboxConfig.xtControls)
 				c.Reset();
 		}
 
@@ -168,55 +141,17 @@ namespace BSGTools.IO {
 		/// <param name="blocked">To block/unblock.</param>
 		/// <seealso cref="Control.blocked"/>
 		public void SetBlockAll(bool blocked) {
-			foreach(var c in controls)
+			foreach(var c in standaloneConfig.controls)
+				c.blocked = blocked;
+			foreach(var c in xboxConfig.xbControls)
+				c.blocked = blocked;
+			foreach(var c in xboxConfig.xsControls)
+				c.blocked = blocked;
+			foreach(var c in xboxConfig.xtControls)
 				c.blocked = blocked;
 		}
 
-		///// <summary>
-		///// Searches the control list for the provided Control objects
-		///// and replaces them with said provided object
-		///// </summary>
-		///// <param name="controls">The Control objects to search and replace</param>
-		//public void UpdateControls(params Control[] controls) {
-		//	foreach(var c in controls) {
-		//		int index = this.controls.IndexOf(c);
-		//		if(index == -1)
-		//			throw new System.ArgumentException(string.Format("Could not find Control {0} in master control list. Aborting!", c.ToString()));
-		//		this.controls[index] = c;
-		//	}
-		//}
-
-		/// <summary>
-		/// Internally used to get all <see cref="Control"/> variables using reflection from a class instance.
-		/// Not the most performance efficient method of supplying InputMaster with controls.
-		/// </summary>
-		/// <param name="controlClass">The instance of a class to get the controls from.</param>
-		/// <returns>An array of all Control objects.</returns>
-		private static Control[] GetAllControls(object controlClass) {
-			var type = controlClass.GetType();
-
-			var bf = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
-
-			var properties = type.GetProperties(bf).Where(p => p.GetValue(controlClass, null) != null).Select(p => p.GetValue(controlClass, null));
-			var fields = type.GetFields(bf).Where(f => f.GetValue(controlClass) != null).Select(f => f.GetValue(controlClass));
-
-			var p_bare = properties.OfType<Control>();
-			var p_enum = properties.OfType<IEnumerable<Control>>();
-			var f_bare = fields.OfType<Control>();
-			var f_enum = fields.OfType<IEnumerable<Control>>();
-
-			var final = p_bare.Concat(f_bare);
-
-			foreach(var p_array in p_enum)
-				final = final.Concat(p_array);
-			foreach(var f_array in f_enum)
-				final = final.Concat(f_array);
-
-			return final.ToArray();
-		}
-
 #if XBOX_ALLOWED
-
 		private void OnApplicationFocus(bool focused) {
 			if(XboxUtils.StopVibrateOnAppFocusLost && focused == false)
 				XboxUtils.SetVibrationAll(0f);
@@ -230,27 +165,23 @@ namespace BSGTools.IO {
 		private void OnApplicationQuit() {
 			XboxUtils.SetVibrationAll(0f);
 		}
-
 #endif
 
 		void Update() {
 #if XBOX_ALLOWED
 			XboxUtils.UpdateStates();
 #endif
-
-#if UNITY_4_6
 			UpdateInputModule();
-#endif
 
-			if(string.IsNullOrEmpty(mouseXAxisName) == false) {
+			if(!string.IsNullOrEmpty(mouseXAxisName)) {
 				mouseX = Input.GetAxis(mouseXAxisName);
 				mouseXRaw = Input.GetAxisRaw(mouseXAxisName);
 			}
-			if(string.IsNullOrEmpty(mouseYAxisName) == false) {
+			if(!string.IsNullOrEmpty(mouseYAxisName)) {
 				mouseY = Input.GetAxis(mouseYAxisName);
 				mouseYRaw = Input.GetAxisRaw(mouseYAxisName);
 			}
-			if(string.IsNullOrEmpty(mouseWheelAxisName) == false) {
+			if(!string.IsNullOrEmpty(mouseWheelAxisName)) {
 				mouseWheel = Input.GetAxis(mouseWheelAxisName);
 				mouseWheelRaw = Input.GetAxisRaw(mouseWheelAxisName);
 			}
@@ -259,22 +190,22 @@ namespace BSGTools.IO {
 			anyControlHeld = false;
 			anyControlUp = false;
 
-			foreach(var c in controls) {
+			foreach(var c in standaloneConfig.controls) {
 				if((c.debugOnly && Debug.isDebugBuild) || c.debugOnly == false) {
 					c.Update();
 
-					if(c.Down.HasFlag(ControlState.Either))
+					if(c.down.HasFlag(ControlState.Either))
 						anyControlDown = true;
-					if(c.Held.HasFlag(ControlState.Either))
+					if(c.held.HasFlag(ControlState.Either))
 						anyControlHeld = true;
-					if(c.Up.HasFlag(ControlState.Either))
+					if(c.up.HasFlag(ControlState.Either))
 						anyControlUp = true;
 				}
 			}
 		}
 
 		private void UpdateInputModule() {
-#if UNITY_4_6
+#if NEW_UI
 			if(EventSystem.current == null)
 				return;
 

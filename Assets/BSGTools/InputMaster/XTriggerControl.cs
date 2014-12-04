@@ -58,11 +58,11 @@ namespace BSGTools.IO.Xbox {
 			var triggerVal = (trigger == XTrigger.TriggerLeft) ? gpState.Triggers.Left : gpState.Triggers.Right;
 
 			if(triggerVal > realValue)
-				Down = ControlState.Positive;
+				down = ControlState.Positive;
 			else if(triggerVal < realValue)
-				Up = ControlState.Positive;
+				up = ControlState.Positive;
 			else if(Mathf.Approximately(triggerVal, realValue))
-				Held = ControlState.Positive;
+				held = ControlState.Positive;
 #endif
 		}
 

@@ -22,9 +22,9 @@ namespace BSGTools.Editors {
 		void OnEnable() {
 			scroll = Vector2.zero;
 			config = target as XboxControlConfig;
-			xbFoldouts = Enumerable.Repeat(false, config.xButtonControls.Count).ToList();
-			xsFoldouts = Enumerable.Repeat(false, config.xButtonControls.Count).ToList();
-			xtFoldouts = Enumerable.Repeat(false, config.xButtonControls.Count).ToList();
+			xbFoldouts = Enumerable.Repeat(false, config.xbControls.Count).ToList();
+			xsFoldouts = Enumerable.Repeat(false, config.xbControls.Count).ToList();
+			xtFoldouts = Enumerable.Repeat(false, config.xbControls.Count).ToList();
 		}
 
 		public override void OnInspectorGUI() {
@@ -40,8 +40,8 @@ namespace BSGTools.Editors {
 
 			if(!filterAny || filterXB) {
 				EditorGUILayout.LabelField("XButtonControls", EditorStyles.boldLabel);
-				for(int i = 0;i < config.xButtonControls.Count;i++) {
-					var c = config.xButtonControls[i];
+				for(int i = 0;i < config.xbControls.Count;i++) {
+					var c = config.xbControls[i];
 					if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
 						continue;
 
@@ -50,7 +50,7 @@ namespace BSGTools.Editors {
 					if(xbFoldouts[i]) {
 						EditorGUI.indentLevel = 2;
 						if(DrawControl(c)) {
-							config.xButtonControls.RemoveAt(i);
+							config.xbControls.RemoveAt(i);
 							xbFoldouts.RemoveAt(i);
 						}
 						//FixInvalidValues(c);
@@ -62,8 +62,8 @@ namespace BSGTools.Editors {
 			if(!filterAny || filterXS) {
 				EditorGUI.indentLevel = 0;
 				EditorGUILayout.LabelField("XStickControls", EditorStyles.boldLabel);
-				for(int i = 0;i < config.xStickControls.Count;i++) {
-					var c = config.xStickControls[i];
+				for(int i = 0;i < config.xsControls.Count;i++) {
+					var c = config.xsControls[i];
 					if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
 						continue;
 
@@ -72,7 +72,7 @@ namespace BSGTools.Editors {
 					if(xsFoldouts[i]) {
 						EditorGUI.indentLevel = 2;
 						if(DrawControl(c)) {
-							config.xStickControls.RemoveAt(i);
+							config.xsControls.RemoveAt(i);
 							xsFoldouts.RemoveAt(i);
 						}
 						//FixInvalidValues(c);
@@ -84,8 +84,8 @@ namespace BSGTools.Editors {
 			if(!filterAny || filterXT) {
 				EditorGUI.indentLevel = 0;
 				EditorGUILayout.LabelField("XTriggerControls", EditorStyles.boldLabel);
-				for(int i = 0;i < config.xTriggerControls.Count;i++) {
-					var c = config.xTriggerControls[i];
+				for(int i = 0;i < config.xtControls.Count;i++) {
+					var c = config.xtControls[i];
 					if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
 						continue;
 
@@ -94,7 +94,7 @@ namespace BSGTools.Editors {
 					if(xtFoldouts[i]) {
 						EditorGUI.indentLevel = 2;
 						if(DrawControl(c)) {
-							config.xTriggerControls.RemoveAt(i);
+							config.xtControls.RemoveAt(i);
 							xtFoldouts.RemoveAt(i);
 						}
 					}
@@ -160,30 +160,30 @@ namespace BSGTools.Editors {
 
 			EditorGUILayout.BeginVertical();
 			if(GUILayout.Button("New XBC")) {
-				config.xButtonControls.Add(new XButtonControl(XButton.A));
+				config.xbControls.Add(new XButtonControl(XButton.A));
 				xbFoldouts.Add(false);
 			}
 			if(GUILayout.Button("New XSC")) {
-				config.xStickControls.Add(new XStickControl(XStick.StickLeftX));
+				config.xsControls.Add(new XStickControl(XStick.StickLeftX));
 				xsFoldouts.Add(false);
 			}
 			if(GUILayout.Button("New XTC")) {
-				config.xTriggerControls.Add(new XTriggerControl(XTrigger.TriggerLeft));
+				config.xtControls.Add(new XTriggerControl(XTrigger.TriggerLeft));
 				xtFoldouts.Add(false);
 			}
 			EditorGUILayout.EndVertical();
 
 			EditorGUILayout.BeginVertical();
 			if(GUILayout.Button("Remove All")) {
-				config.xButtonControls.Clear();
+				config.xbControls.Clear();
 				xbFoldouts.Clear();
 			}
 			if(GUILayout.Button("Remove All")) {
-				config.xStickControls.Clear();
+				config.xsControls.Clear();
 				xsFoldouts.Clear();
 			}
 			if(GUILayout.Button("Remove All")) {
-				config.xTriggerControls.Clear();
+				config.xtControls.Clear();
 				xtFoldouts.Clear();
 			}
 			EditorGUILayout.EndVertical();

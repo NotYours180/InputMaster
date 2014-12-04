@@ -59,17 +59,17 @@ namespace BSGTools.IO {
 		/// <value>
 		/// The current "down" state of the control.
 		/// </value>
-		public ControlState Down { get; set; }
+		public ControlState down { get; protected set; }
 
 		/// <value>
 		/// The current "held" state of the control.
 		/// </value>
-		public ControlState Held { get; set; }
+		public ControlState held { get; protected set; }
 
 		/// <value>
 		/// The current "up" state of the control.
 		/// </value>
-		public ControlState Up { get; set; }
+		public ControlState up { get; protected set; }
 
 		/// <value>
 		/// Functionally identical to the Dead property of Unity's native Input system.
@@ -148,9 +148,9 @@ namespace BSGTools.IO {
 		/// </summary>
 		/// <seealso cref="Reset(bool)"/>
 		public void Reset() {
-			Down = ControlState.Neither;
-			Up = ControlState.Neither;
-			Held = ControlState.Neither;
+			down = ControlState.Neither;
+			up = ControlState.Neither;
+			held = ControlState.Neither;
 			fixedValue = 0;
 			value = 0f;
 			realValue = 0f;
@@ -197,14 +197,14 @@ namespace BSGTools.IO {
 		/// Internally used for updating a control's values using it's current states.
 		/// </summary>
 		protected virtual void UpdateValues() {
-			if(Held.HasFlag(ControlState.Positive))
+			if(held.HasFlag(ControlState.Positive))
 				realValue += Time.deltaTime * sensitivity;
 			else if(realValue > 0f) {
 				realValue -= Time.deltaTime * sensitivity;
 				if(realValue < 0f)
 					realValue = 0f;
 			}
-			if(Held.HasFlag(ControlState.Negative))
+			if(held.HasFlag(ControlState.Negative))
 				realValue -= Time.deltaTime * sensitivity;
 			else if(realValue < 0f) {
 				realValue += Time.deltaTime * sensitivity;
@@ -214,10 +214,10 @@ namespace BSGTools.IO {
 
 			realValue = Mathf.Clamp(realValue, -1f, 1f);
 
-			if(Held != ControlState.Both && snap) {
-				if(realValue > 0f && Held.HasFlag(ControlState.Negative))
+			if(held != ControlState.Both && snap) {
+				if(realValue > 0f && held.HasFlag(ControlState.Negative))
 					realValue = 0f;
-				else if(realValue < 0f && Held.HasFlag(ControlState.Positive))
+				else if(realValue < 0f && held.HasFlag(ControlState.Positive))
 					realValue = 0f;
 			}
 
@@ -254,9 +254,9 @@ namespace BSGTools.IO {
 		/// <param name="f">The value to round and clamp.</param>
 		/// <returns>-1, 1 or 0</returns>
 		public sbyte GetFV() {
-			if(Down == ControlState.Positive || Held == ControlState.Positive)
+			if(down == ControlState.Positive || held == ControlState.Positive)
 				return 1;
-			else if(Down == ControlState.Negative || Held == ControlState.Negative)
+			else if(down == ControlState.Negative || held == ControlState.Negative)
 				return -1;
 			else
 				return 0;

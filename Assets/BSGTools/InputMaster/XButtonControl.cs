@@ -25,43 +25,16 @@ namespace BSGTools.IO.Xbox {
 
 
 		/// <summary>
-		/// Creates an XButtonControl for a single player game.
+		/// Creates an XButtonControl.
 		/// </summary>
 		/// <param name="positive">The positive binding. CANNOT BE XButton.None!</param>
 		public XButtonControl(XButton positive)
-			: this(0, positive, XButton.None) {
+			: this(positive, XButton.None) {
 		}
 
-		/// <summary>
-		/// Creates an XButtonControl for a single player game.
-		/// </summary>
-		/// <param name="positive">The positive binding. CANNOT BE XButton.None!</param>
-		/// <param name="negative">The negative binding.</param>
-		public XButtonControl(XButton positive, XButton negative)
-			: this(0, positive, negative) {
-		}
-
-		private XButtonControl(byte controllerIndex, XButton positive, XButton negative)
-			: base(controllerIndex) {
+		private XButtonControl(XButton positive, XButton negative) {
 			this.positive = positive;
 			this.negative = negative;
-		}
-
-		/// <summary>
-		/// Creates a clone of this XButtonControl.
-		/// </summary>
-		/// <param name="controller">The index of the controller that will manipulate this control's states and values.</param>
-		/// <returns>The cloned control.</returns>
-		protected override XButtonControl CreateClone(byte controller) {
-			return new XButtonControl(controller, this.positive, this.negative) {
-				gravity = this.gravity,
-				sensitivity = this.sensitivity,
-				snap = this.snap,
-				invert = this.invert,
-				dead = this.dead,
-				blocked = this.blocked,
-				identifier = this.identifier
-			};
 		}
 
 		/// <summary>
@@ -69,42 +42,45 @@ namespace BSGTools.IO.Xbox {
 		/// </summary>
 		protected override void UpdateStates() {
 #if XBOX_ALLOWED
-			var gpState = XboxUtils.ControllerStates[ControllerIndex];
-			var pos = (invert) ? negative : positive;
-			var neg = (invert) ? positive : negative;
+			for(byte i = 0;i < 3;i++) {
+				currentController = i;
+				var gpState = XboxUtils.ControllerStates[i];
+				var pos = (invert) ? negative : positive;
+				var neg = (invert) ? positive : negative;
 
-			var positivePressed = false;
-			var negativePressed = false;
+				var positivePressed = false;
+				var negativePressed = false;
 
-			positivePressed = XBindingVal(pos, gpState);
-			negativePressed = XBindingVal(neg, gpState);
+				positivePressed = XBindingVal(pos, gpState);
+				negativePressed = XBindingVal(neg, gpState);
 
-			if(positivePressed) {
-				Held |= ControlState.Positive;
-				if(reportedPosDown == false) {
-					Down |= ControlState.Positive;
-					reportedPosDown = true;
-					reportedPosUp = false;
+				if(positivePressed) {
+					held |= ControlState.Positive;
+					if(reportedPosDown == false) {
+						down |= ControlState.Positive;
+						reportedPosDown = true;
+						reportedPosUp = false;
+					}
 				}
-			}
-			else if(reportedPosUp == false) {
-				Up |= ControlState.Positive;
-				reportedPosUp = true;
-				reportedPosDown = false;
-			}
-
-			if(negativePressed) {
-				Held |= ControlState.Negative;
-				if(reportedNegDown == false) {
-					Down |= ControlState.Negative;
-					reportedNegDown = true;
-					reportedNegUp = false;
+				else if(reportedPosUp == false) {
+					up |= ControlState.Positive;
+					reportedPosUp = true;
+					reportedPosDown = false;
 				}
-			}
-			else if(reportedNegUp == false) {
-				Up |= ControlState.Negative;
-				reportedNegUp = true;
-				reportedNegDown = false;
+
+				if(negativePressed) {
+					held |= ControlState.Negative;
+					if(reportedNegDown == false) {
+						down |= ControlState.Negative;
+						reportedNegDown = true;
+						reportedNegUp = false;
+					}
+				}
+				else if(reportedNegUp == false) {
+					up |= ControlState.Negative;
+					reportedNegUp = true;
+					reportedNegDown = false;
+				}
 			}
 #endif
 		}

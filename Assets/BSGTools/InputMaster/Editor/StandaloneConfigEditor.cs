@@ -24,7 +24,7 @@ namespace BSGTools.Editors {
 		void OnEnable() {
 			scroll = Vector2.zero;
 			config = target as StandaloneControlConfig;
-			foldouts = Enumerable.Repeat(false, config.standaloneControls.Count).ToList();
+			foldouts = Enumerable.Repeat(false, config.controls.Count).ToList();
 		}
 
 		public override void OnInspectorGUI() {
@@ -37,8 +37,8 @@ namespace BSGTools.Editors {
 
 		void DrawControls() {
 			scroll = EditorGUILayout.BeginScrollView(scroll);
-			for(int i = 0;i < config.standaloneControls.Count;i++) {
-				var c = config.standaloneControls[i];
+			for(int i = 0;i < config.controls.Count;i++) {
+				var c = config.controls[i];
 				if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
 					continue;
 
@@ -47,7 +47,7 @@ namespace BSGTools.Editors {
 				if(foldouts[i]) {
 					EditorGUI.indentLevel = 2;
 					if(DrawControl(c)) {
-						config.standaloneControls.RemoveAt(i);
+						config.controls.RemoveAt(i);
 						foldouts.RemoveAt(i);
 					}
 					FixInvalidValues(c);
@@ -106,11 +106,11 @@ namespace BSGTools.Editors {
 			EditorGUILayout.Space();
 			EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button("Add New")) {
-				config.standaloneControls.Add(new StandaloneControl(KeyCode.A));
+				config.controls.Add(new StandaloneControl(KeyCode.A));
 				foldouts.Add(false);
 			}
 			if(GUILayout.Button("Remove All")) {
-				config.standaloneControls.Clear();
+				config.controls.Clear();
 				foldouts.Clear();
 			}
 			if(GUILayout.Button("Expand All"))

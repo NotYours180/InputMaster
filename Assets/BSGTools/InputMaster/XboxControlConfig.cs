@@ -6,8 +6,8 @@ using System;
 namespace BSGTools.IO.Xbox {
 	[Serializable]
 	public class XboxControlConfig : ScriptableObject {
-		public List<XButtonControl> xButtonControls;
-		public List<XStickControl> xStickControls;
-		public List<XTriggerControl> xTriggerControls;
+		public List<XButtonControl> xbControls;
+		public List<XStickControl> xsControls;
+		public List<XTriggerControl> xtControls;
 	}
 }

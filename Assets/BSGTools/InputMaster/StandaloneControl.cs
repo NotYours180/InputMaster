@@ -62,27 +62,27 @@ public sealed class StandaloneControl : Control {
 
 		if(modPass == false) {
 			if(realValue > 0f)
-				Up |= ControlState.Positive;
+				up |= ControlState.Positive;
 			else if(realValue < 0f)
-				Up |= ControlState.Negative;
+				up |= ControlState.Negative;
 
 			return;
 		}
 
 		if(Input.GetKeyDown(pos))
-			Down |= ControlState.Positive;
+			down |= ControlState.Positive;
 		if(Input.GetKey(pos))
-			Held |= ControlState.Positive;
+			held |= ControlState.Positive;
 		if(Input.GetKeyUp(pos))
-			Up |= ControlState.Positive;
+			up |= ControlState.Positive;
 
 		if(negative != KeyCode.None) {
 			if(Input.GetKey(neg))
-				Held |= ControlState.Negative;
+				held |= ControlState.Negative;
 			if(Input.GetKeyUp(neg))
-				Up |= ControlState.Negative;
+				up |= ControlState.Negative;
 			if(Input.GetKeyDown(neg))
-				Down |= ControlState.Negative;
+				down |= ControlState.Negative;
 		}
 	}
 }

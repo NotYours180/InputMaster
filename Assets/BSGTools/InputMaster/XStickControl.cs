@@ -68,19 +68,19 @@ namespace BSGTools.IO.Xbox {
 
 
 			if(value == 0f && realValue > 0f)
-				Down = ControlState.Positive;
+				down = ControlState.Positive;
 			else if(value == 0f && realValue < 0f)
-				Down = ControlState.Negative;
+				down = ControlState.Negative;
 
 			if(value > 0f && realValue == 0f)
-				Up = ControlState.Positive;
+				up = ControlState.Positive;
 			else if(value < 0f && realValue == 0f)
-				Up = ControlState.Negative;
+				up = ControlState.Negative;
 
 			if(realValue > 0f)
-				Held = ControlState.Positive;
+				held = ControlState.Positive;
 			else if(realValue < 0f)
-				Held = ControlState.Negative;
+				held = ControlState.Negative;
 
 			value = realValue;
 			fixedValue = GetFV();

@@ -37,23 +37,23 @@ namespace BSGTools.Editors {
 
 			if(standaloneConfig != null) {
 				sb.AppendLine("\t// Standalone Controls");
-				foreach(var c in standaloneConfig.standaloneControls)
+				foreach(var c in standaloneConfig.controls)
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 			}
 			if(xboxConfig != null) {
 				sb.AppendLine();
 				sb.AppendLine("\t// XButton Controls");
-				foreach(var c in xboxConfig.xButtonControls)
+				foreach(var c in xboxConfig.xbControls)
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 
 				sb.AppendLine();
 				sb.AppendLine("\t// XStick Controls");
-				foreach(var c in xboxConfig.xStickControls)
+				foreach(var c in xboxConfig.xsControls)
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 
 				sb.AppendLine();
 				sb.AppendLine("\t// XTrigger Controls");
-				foreach(var c in xboxConfig.xTriggerControls)
+				foreach(var c in xboxConfig.xtControls)
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 			}
 			templateText = string.Format(templateText, scriptName, sb.ToString().TrimEnd());

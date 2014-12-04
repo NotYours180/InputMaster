@@ -34,60 +34,89 @@ namespace BSGTools.IO.Xbox {
 	/// <typeparam name="T">Used for generic self-creation.</typeparam>
 	[Serializable]
 	public abstract class XboxControl<T> : Control where T : IXboxControl {
+		public byte currentController { get; set; }
 
-		/// <value>
-		/// The index of the controller that will manipulate this control's states and values.
-		/// This is used in conjunction to the PlayerIndex enumeration in XInput.
-		/// </value>
-		public byte ControllerIndex { get; private set; }
 
-		/// <summary>
-		/// Creates a new <typeparamref name="XboxControl"/>.
-		/// </summary>
-		/// <param name="controllerIndex"><see cref="ControllerIndex"/></param>
-		protected XboxControl(byte controllerIndex) {
-			if(controllerIndex < 0 || controllerIndex > 3)
-				throw new ArgumentOutOfRangeException("controllerIndex");
-			this.ControllerIndex = controllerIndex;
+		public float[] values { get; private set; }
+		public float[] realValues { get; private set; }
+		public byte[] fixedValues { get; private set; }
+		public new float value {
+			get { return values[currentController]; }
+			protected set { values[currentController] = value; }
+		}
+		public new float realValue {
+			get { return realValues[currentController]; }
+			protected set { realValues[currentController] = value; }
+		}
+		public new byte fixedValue {
+			get { return fixedValues[currentController]; }
+			protected set { fixedValues[currentController] = value; }
 		}
 
-		/// <summary>
-		/// Allows for the creation of up to 4 XboxControls at the same time (one for each controller index).
-		/// An <typeparamref name="XboxControl"/> must be provided for cloning.
-		/// The <see cref="ControllerIndex"/> of the provided clone is ignored.
-		/// </summary>
-		/// <param name="count">The number of controllers to create this control for.</param>
-		/// <param name="toClone">The instance to take values from for clone creation.</param>
-		/// <returns>An array of type T, each assigned to a specific controller index.</returns>
-		/// <strong>Example</strong>
-		/// <code>
-		///	<pre>
-		///		// Defines a jump control for all 4 players.
-		///		XButtonControl[] jump = XButtonControl.CreateMultiple(4, new XButtonControl(0, XButton.A) {
-		///			Name = "Jump",
-		///			Gravity = 2f,
-		///			Sensitivity = 2f
-		///		});
-		///
-		///		// Usage
-		///		jump[0].Value; //Player One's jump value
-		///		jump[3].Value; //Player Four's jump value
-		/// </pre>
-		/// </code>
-		public static T[] CreateMultiple(byte count, T toClone) {
-			if(count < 2 || count > 4)
-				throw new ArgumentOutOfRangeException("count");
-			var xbc = new T[count];
-			for(byte i = 0;i < count;i++)
-				xbc[i] = (toClone as XboxControl<T>).CreateClone(i);
-			return xbc;
+		public ControlState[] downs { get; private set; }
+		public ControlState[] helds { get; private set; }
+		public ControlState[] ups { get; private set; }
+		public new ControlState down {
+			get { return downs[currentController]; }
+			protected set { downs[currentController] = value; }
+		}
+		public new ControlState held {
+			get { return helds[currentController]; }
+			protected set { helds[currentController] = value; }
+		}
+		public new ControlState up {
+			get { return ups[currentController]; }
+			protected set { ups[currentController] = value; }
 		}
 
-		/// <summary>
-		/// Creates a clone of an this XboxControl.
-		/// </summary>
-		/// <param name="controller">The index of the controller that will manipulate this control's states and values.</param>
-		/// <returns></returns>
-		protected abstract T CreateClone(byte controller);
+		public float[] gravities { get; private set; }
+		public float[] sensitivities { get; private set; }
+		public float[] deads { get; private set; }
+		public new float gravity {
+			get { return gravities[currentController]; }
+			protected set { gravities[currentController] = value; }
+		}
+		public new float sensitivity {
+			get { return sensitivities[currentController]; }
+			protected set { sensitivities[currentController] = value; }
+		}
+		public new float dead {
+			get { return deads[currentController]; }
+			protected set { deads[currentController] = value; }
+		}
+
+		public bool[] snaps { get; private set; }
+		public bool[] inverteds { get; private set; }
+		public bool[] debugOnlys { get; private set; }
+		public new bool snap {
+			get { return snaps[currentController]; }
+			protected set { snaps[currentController] = value; }
+		}
+		public new bool inverted {
+			get { return inverteds[currentController]; }
+			protected set { inverteds[currentController] = value; }
+		}
+		public new bool debugOnly {
+			get { return debugOnlys[currentController]; }
+			protected set { debugOnlys[currentController] = value; }
+		}
+
+		public XboxControl() {
+			values = new float[4];
+			realValues = new float[4];
+			fixedValues = new byte[4];
+
+			downs = new ControlState[4];
+			ups = new ControlState[4];
+			helds = new ControlState[4];
+
+			gravities = new float[4];
+			sensitivities = new float[4];
+			deads = new float[4];
+
+			snaps = new bool[4];
+			inverteds = new bool[4];
+			debugOnlys = new bool[4];
+		}
 	}
 }
