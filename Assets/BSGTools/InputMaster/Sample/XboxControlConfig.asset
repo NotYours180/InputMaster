@@ -9,10 +9,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8a7abe839a0ca844cb110bb7ddf1f017, type: 3}
-  m_Name: New XboxControlConfig
+  m_Name: XboxControlConfig
   m_EditorClassIdentifier: 
-  xButtonControls:
-  - identifier: testBtn
+  xbControls:
+  - identifier: new_201BEA8F
     dead: 0
     gravity: 1
     sensitivity: 1
@@ -21,9 +21,9 @@ MonoBehaviour:
     debugOnly: 0
     snap: 0
     positive: 1
-    negative: 14
-  xStickControls:
-  - identifier: new_1965B721
+    negative: 0
+  xsControls:
+  - identifier: new_2C4C677E
     dead: 0
     gravity: 1
     sensitivity: 1
@@ -32,8 +32,8 @@ MonoBehaviour:
     debugOnly: 0
     snap: 0
     stick: 0
-  xTriggerControls:
-  - identifier: new_9CE4B947
+  xtControls:
+  - identifier: new_60366045
     dead: 0
     gravity: 1
     sensitivity: 1

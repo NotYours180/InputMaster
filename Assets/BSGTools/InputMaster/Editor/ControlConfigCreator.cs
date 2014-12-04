@@ -16,5 +16,10 @@ namespace BSGTools.Editors {
 		public static void CreateXboxConfig() {
 			ScriptableObjectUtility.CreateAssetFrom<XboxControlConfig>();
 		}
+
+		[MenuItem("BSGTools/InputMaster/Create New CombinedOutputsConfig")]
+		public static void CreateCombinedOutputsConfig() {
+			ScriptableObjectUtility.CreateAssetFrom<CombinedOutputsConfig>();
+		}
 	}
 }

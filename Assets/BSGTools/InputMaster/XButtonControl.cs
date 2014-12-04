@@ -10,7 +10,7 @@ namespace BSGTools.IO.Xbox {
 	/// Used for integrating Xbox 360 controller digital buttons/inputs into InputMaster's Control system.
 	/// </summary>
 	[Serializable]
-	public sealed class XButtonControl : XboxControl<XButtonControl>, IXboxControl {
+	public sealed class XButtonControl : XboxControl {
 		private bool reportedPosUp, reportedPosDown, reportedNegUp, reportedNegDown;
 
 		/// <value>
@@ -42,9 +42,9 @@ namespace BSGTools.IO.Xbox {
 		/// </summary>
 		protected override void UpdateStates() {
 #if XBOX_ALLOWED
-			for(byte i = 0;i < 3;i++) {
+			for(byte i = 0;i < 4;i++) {
 				currentController = i;
-				var gpState = XboxUtils.ControllerStates[i];
+				var gpState = XboxUtils.ControllerStates[currentController];
 				var pos = (invert) ? negative : positive;
 				var neg = (invert) ? positive : negative;
 

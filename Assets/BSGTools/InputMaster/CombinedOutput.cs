@@ -18,6 +18,7 @@ using System.Text;
 using BSGTools.IO.Xbox;
 using UnityEngine;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace BSGTools.IO {
 
@@ -34,8 +35,11 @@ namespace BSGTools.IO {
 		/// </value>
 		public float FixedValueF {
 			get {
+				var controls = this.controls;
+				foreach(var c in controls.OfType<XboxControl>())
+					c.currentController = controllerIndex;
 				float total = 0f;
-				foreach(var c in Controls)
+				foreach(var c in controls)
 					total += c.fixedValue;
 
 				float post = 0f;
@@ -53,8 +57,11 @@ namespace BSGTools.IO {
 		/// </value>
 		public sbyte FixedValue {
 			get {
+				var controls = this.controls;
+				foreach(var c in controls.OfType<XboxControl>())
+					c.currentController = controllerIndex;
 				float total = 0f;
-				foreach(var c in Controls)
+				foreach(var c in controls)
 					total += c.fixedValue;
 
 				float post = 0f;
@@ -72,8 +79,11 @@ namespace BSGTools.IO {
 		/// </value>
 		public float Value {
 			get {
+				var controls = this.controls;
+				foreach(var c in controls.OfType<XboxControl>())
+					c.currentController = controllerIndex;
 				float total = 0f;
-				foreach(var c in Controls)
+				foreach(var c in controls)
 					total += c.value;
 
 				float post = 0f;
@@ -92,7 +102,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyDownPositive {
 			get {
-				return Controls.Any(c => c.down == ControlState.Positive);
+				return controls.Any(c => c.down == ControlState.Positive);
 			}
 		}
 		/// <value>
@@ -100,7 +110,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyDownNegative {
 			get {
-				return Controls.Any(c => c.down == ControlState.Negative);
+				return controls.Any(c => c.down == ControlState.Negative);
 			}
 		}
 
@@ -109,7 +119,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyHeldPositive {
 			get {
-				return Controls.Any(c => c.held == ControlState.Positive);
+				return controls.Any(c => c.held == ControlState.Positive);
 			}
 		}
 		/// <value>
@@ -117,7 +127,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyHeldNegative {
 			get {
-				return Controls.Any(c => c.held == ControlState.Negative);
+				return controls.Any(c => c.held == ControlState.Negative);
 			}
 		}
 
@@ -126,7 +136,7 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyUpPositive {
 			get {
-				return Controls.Any(c => c.up == ControlState.Positive);
+				return controls.Any(c => c.up == ControlState.Positive);
 			}
 		}
 		/// <value>
@@ -134,27 +144,38 @@ namespace BSGTools.IO {
 		/// </value>
 		public bool AnyUpNegative {
 			get {
-				return Controls.Any(c => c.up == ControlState.Negative);
+				return controls.Any(c => c.up == ControlState.Negative);
 			}
 		}
 		#endregion
 
 		public void SetBlockedAll(bool blocked) {
-			foreach(var c in Controls)
+			var controls = this.controls;
+			foreach(var c in controls)
 				c.blocked = blocked;
 		}
 
 		/// <value>
 		/// The combined Controls.
 		/// </value>
-		public Control[] Controls { get; private set; }
+		public List<string> identifiers { get; private set; }
+
+		public string identifier = "new_" + Guid.NewGuid().ToString().ToUpper().Split('-')[0];
+		public byte controllerIndex = 0;
+
+		Control[] controls {
+			get {
+				var io = InputMaster.instance;
+				return identifiers.Select(s => io.GetControl<Control>(s)).ToArray();
+			}
+		}
 
 		/// <summary>
 		/// Creates a new CombinedOutput.
 		/// </summary>
 		/// <param name="controls">The controls to combine into a single output.</param>
-		public CombinedOutput(params Control[] controls) {
-			this.Controls = controls;
+		public CombinedOutput() {
+			identifiers = new List<string>();
 		}
 	}
 }

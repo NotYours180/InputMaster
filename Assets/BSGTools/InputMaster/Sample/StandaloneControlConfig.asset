@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b35a78f8e91bf6439c444289bb3057c, type: 3}
+  m_Name: StandaloneControlConfig
+  m_EditorClassIdentifier: 
+  controls:
+  - identifier: moveFB
+    dead: 0
+    gravity: 3
+    sensitivity: 2
+    invert: 0
+    blocked: 0
+    debugOnly: 0
+    snap: 0
+    positive: 119
+    negative: 115
+  - identifier: strafe
+    dead: 0
+    gravity: 3
+    sensitivity: 2
+    invert: 0
+    blocked: 0
+    debugOnly: 0
+    snap: 0
+    positive: 100
+    negative: 97
+  - identifier: sprint
+    dead: 0
+    gravity: 1.5
+    sensitivity: .5
+    invert: 0
+    blocked: 0
+    debugOnly: 0
+    snap: 0
+    positive: 304
+    negative: 0
+  - identifier: printPosition
+    dead: 0
+    gravity: 1
+    sensitivity: 1
+    invert: 0
+    blocked: 0
+    debugOnly: 1
+    snap: 0
+    positive: 282
+    negative: 0

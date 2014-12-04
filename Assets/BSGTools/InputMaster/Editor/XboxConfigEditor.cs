@@ -4,6 +4,7 @@ using UnityEditor;
 using BSGTools.IO.Xbox;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace BSGTools.Editors {
 	[CustomEditor(typeof(XboxControlConfig))]
@@ -13,7 +14,7 @@ namespace BSGTools.Editors {
 		[SerializeField]
 		Vector2 scroll;
 		[SerializeField]
-		List<bool> xbFoldouts, xsFoldouts, xtFoldouts;
+		List<bool> foldouts;
 		[SerializeField]
 		string filterStr;
 		[SerializeField]
@@ -22,12 +23,13 @@ namespace BSGTools.Editors {
 		void OnEnable() {
 			scroll = Vector2.zero;
 			config = target as XboxControlConfig;
-			xbFoldouts = Enumerable.Repeat(false, config.xbControls.Count).ToList();
-			xsFoldouts = Enumerable.Repeat(false, config.xbControls.Count).ToList();
-			xtFoldouts = Enumerable.Repeat(false, config.xbControls.Count).ToList();
+			foldouts = Enumerable.Repeat(false, config.controls.Count).ToList();
 		}
 
 		public override void OnInspectorGUI() {
+			config.controls.Sort(new Comparison<XboxControl>((xc1, xc2) => {
+				return xc1.GetType().Name.CompareTo(xc2.GetType().Name);
+			}));
 			DrawHeaderControls();
 			DrawControls();
 
@@ -105,7 +107,7 @@ namespace BSGTools.Editors {
 		}
 
 		//Returns true if delete button is pressed.
-		bool DrawControl<T>(XboxControl<T> c) where T : IXboxControl {
+		bool DrawControl<T>(T c) where T : XboxControl {
 			GUILayout.BeginHorizontal();
 			GUILayout.Space(EditorGUI.indentLevel * 18);
 			bool shouldDelete = GUILayout.Button("Delete");
@@ -116,7 +118,7 @@ namespace BSGTools.Editors {
 
 			c.identifier = EditorGUILayout.TextField(new GUIContent("Identifier"), c.identifier);
 
-			if(c is XboxControl<XButtonControl>) {
+			if(c is XButtonControl) {
 				var xbc = c as XButtonControl;
 				xbc.positive = (XButton)EditorGUILayout.EnumPopup("Positive", xbc.positive);
 				xbc.negative = (XButton)EditorGUILayout.EnumPopup("Negative", xbc.negative);

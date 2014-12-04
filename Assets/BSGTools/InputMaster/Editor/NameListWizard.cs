@@ -10,6 +10,7 @@ using System.CodeDom.Compiler;
 using Microsoft.CSharp;
 using BSGTools.IO.Xbox;
 using BSGTools.IO;
+using System.Linq;
 
 namespace BSGTools.Editors {
 	public class NameListWizard : ScriptableWizard {
@@ -21,6 +22,8 @@ namespace BSGTools.Editors {
 		StandaloneControlConfig standaloneConfig;
 		[SerializeField]
 		XboxControlConfig xboxConfig;
+		[SerializeField]
+		CombinedOutputsConfig combinedOutputsConfig;
 		[SerializeField]
 		string scriptName = "NameList";
 
@@ -35,25 +38,23 @@ namespace BSGTools.Editors {
 			var templateText = File.ReadAllText(Application.dataPath + TEMPLATE, Encoding.Default);
 			var sb = new StringBuilder();
 
-			if(standaloneConfig != null) {
+			if(standaloneConfig != null && standaloneConfig.controls.Count != 0) {
 				sb.AppendLine("\t// Standalone Controls");
 				foreach(var c in standaloneConfig.controls)
+					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier),
+						c.identifier));
+			}
+			if(xboxConfig != null && xboxConfig.controls.Count != 0) {
+				sb.AppendLine();
+				sb.AppendLine("\t// Xbox Controls");
+
+				foreach(var c in xboxConfig.controls)
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 			}
-			if(xboxConfig != null) {
+			if(combinedOutputsConfig != null && combinedOutputsConfig.outputs.Count != 0) {
 				sb.AppendLine();
-				sb.AppendLine("\t// XButton Controls");
-				foreach(var c in xboxConfig.xbControls)
-					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
-
-				sb.AppendLine();
-				sb.AppendLine("\t// XStick Controls");
-				foreach(var c in xboxConfig.xsControls)
-					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
-
-				sb.AppendLine();
-				sb.AppendLine("\t// XTrigger Controls");
-				foreach(var c in xboxConfig.xtControls)
+				sb.AppendLine("\t// CombinedOutputs");
+				foreach(var c in combinedOutputsConfig.outputs)
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 			}
 			templateText = string.Format(templateText, scriptName, sb.ToString().TrimEnd());

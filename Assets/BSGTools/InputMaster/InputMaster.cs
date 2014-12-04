@@ -16,7 +16,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
 #endif
-#if UNITY_4_6 || UNITY_5
+#if XBOX_ALLOWED
 #define NEW_UI
 using UnityEngine.EventSystems;
 #endif
@@ -52,11 +52,15 @@ namespace BSGTools.IO {
 	/// Updates and maintains all Control states.
 	/// </summary>
 	[DisallowMultipleComponent]
+	[AddComponentMenu("BSGTools/InputMaster/New InputMaster")]
 	public class InputMaster : MonoBehaviour {
-
+		#region Fields
 		[Header("Base Configurations")]
 		public StandaloneControlConfig standaloneConfig;
 		public XboxControlConfig xboxConfig;
+		public CombinedOutputsConfig combinedOutputs;
+
+		public static InputMaster instance { get; private set; }
 
 		/// <value>
 		/// Are any controls in an active Down state?
@@ -118,6 +122,11 @@ namespace BSGTools.IO {
 		public CombinedOutput coUIVertical { get; set; }
 		public CombinedOutput coUISubmit { get; set; }
 		public CombinedOutput coUICancel { get; set; }
+		#endregion
+
+		void Awake() {
+			InputMaster.instance = this;
+		}
 
 		/// <summary>
 		/// Resets all states/values on all controls.
@@ -126,11 +135,7 @@ namespace BSGTools.IO {
 		public void ResetAll() {
 			foreach(var c in standaloneConfig.controls)
 				c.Reset();
-			foreach(var c in xboxConfig.xbControls)
-				c.Reset();
-			foreach(var c in xboxConfig.xsControls)
-				c.Reset();
-			foreach(var c in xboxConfig.xtControls)
+			foreach(var c in xboxConfig.controls)
 				c.Reset();
 		}
 
@@ -143,11 +148,7 @@ namespace BSGTools.IO {
 		public void SetBlockAll(bool blocked) {
 			foreach(var c in standaloneConfig.controls)
 				c.blocked = blocked;
-			foreach(var c in xboxConfig.xbControls)
-				c.blocked = blocked;
-			foreach(var c in xboxConfig.xsControls)
-				c.blocked = blocked;
-			foreach(var c in xboxConfig.xtControls)
+			foreach(var c in xboxConfig.controls)
 				c.blocked = blocked;
 		}
 
@@ -171,8 +172,6 @@ namespace BSGTools.IO {
 #if XBOX_ALLOWED
 			XboxUtils.UpdateStates();
 #endif
-			UpdateInputModule();
-
 			if(!string.IsNullOrEmpty(mouseXAxisName)) {
 				mouseX = Input.GetAxis(mouseXAxisName);
 				mouseXRaw = Input.GetAxisRaw(mouseXAxisName);
@@ -190,35 +189,53 @@ namespace BSGTools.IO {
 			anyControlHeld = false;
 			anyControlUp = false;
 
-			foreach(var c in standaloneConfig.controls) {
-				if((c.debugOnly && Debug.isDebugBuild) || c.debugOnly == false) {
-					c.Update();
-
-					if(c.down.HasFlag(ControlState.Either))
-						anyControlDown = true;
-					if(c.held.HasFlag(ControlState.Either))
-						anyControlHeld = true;
-					if(c.up.HasFlag(ControlState.Either))
-						anyControlUp = true;
-				}
+			if(standaloneConfig != null)
+				foreach(var c in standaloneConfig.controls)
+					UpdateControl(c);
+			if(xboxConfig != null) {
+				foreach(var c in xboxConfig.controls)
+					UpdateControl(c);
 			}
 		}
 
-		private void UpdateInputModule() {
-#if NEW_UI
-			if(EventSystem.current == null)
-				return;
+		private void UpdateControl(Control c) {
+			if((c.debugOnly && Debug.isDebugBuild) || c.debugOnly == false) {
+				c.Update();
 
-			var im = EventSystem.current.gameObject.GetComponent<InputMasterInputModule>();
-			if(im == null)
-				return;
-
-			im.coUIHorizontal = coUIHorizontal;
-			im.coUIVertical = coUIVertical;
-			im.coUISubmit = coUISubmit;
-			im.coUICancel = coUICancel;
-#endif
+				if(c.down.HasFlag(ControlState.Either))
+					anyControlDown = true;
+				if(c.held.HasFlag(ControlState.Either))
+					anyControlHeld = true;
+				if(c.up.HasFlag(ControlState.Either))
+					anyControlUp = true;
+			}
 		}
 
+		public bool HasControl(string identifier) {
+			bool hasControl = false;
+			if(standaloneConfig != null)
+				hasControl = standaloneConfig.controls.Any(c => c.identifier == identifier);
+			if(hasControl == false && xboxConfig != null)
+				hasControl = xboxConfig.controls.Any(c => c.identifier == identifier);
+			return hasControl;
+		}
+
+		public T GetControl<T>(string identifier) where T : Control {
+			T t = null;
+			if(typeof(T) == typeof(StandaloneControl) && standaloneConfig != null)
+				t = standaloneConfig.controls.SingleOrDefault(c => c.identifier == identifier) as T;
+			if(t == null && typeof(T) == typeof(XboxControl) && xboxConfig != null)
+				t = xboxConfig.controls.SingleOrDefault(c => c.identifier == name) as T;
+			return t;
+		}
+
+		public Control GetControl(string identifier) {
+			Control t = null;
+			if(standaloneConfig != null)
+				t = standaloneConfig.controls.SingleOrDefault(c => c.identifier == identifier);
+			if(t == null && xboxConfig != null)
+				t = xboxConfig.controls.SingleOrDefault(c => c.identifier == name);
+			return t;
+		}
 	}
 }

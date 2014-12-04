@@ -22,24 +22,18 @@ using System;
 using UnityEngine;
 
 namespace BSGTools.IO.Xbox {
-	/// <summary>
-	/// Used for type constraints.
-	/// Contains nor enforces any functionality.
-	/// </summary>
-	public interface IXboxControl { }
-
 	/// <value>
 	/// The base class for all Xbox 360 control classes.
 	/// </value>
 	/// <typeparam name="T">Used for generic self-creation.</typeparam>
 	[Serializable]
-	public abstract class XboxControl<T> : Control where T : IXboxControl {
+	public abstract class XboxControl : Control {
 		public byte currentController { get; set; }
 
 
 		public float[] values { get; private set; }
 		public float[] realValues { get; private set; }
-		public byte[] fixedValues { get; private set; }
+		public sbyte[] fixedValues { get; private set; }
 		public new float value {
 			get { return values[currentController]; }
 			protected set { values[currentController] = value; }
@@ -48,7 +42,7 @@ namespace BSGTools.IO.Xbox {
 			get { return realValues[currentController]; }
 			protected set { realValues[currentController] = value; }
 		}
-		public new byte fixedValue {
+		public new sbyte fixedValue {
 			get { return fixedValues[currentController]; }
 			protected set { fixedValues[currentController] = value; }
 		}
@@ -74,37 +68,37 @@ namespace BSGTools.IO.Xbox {
 		public float[] deads { get; private set; }
 		public new float gravity {
 			get { return gravities[currentController]; }
-			protected set { gravities[currentController] = value; }
+			set { gravities[currentController] = value; }
 		}
 		public new float sensitivity {
 			get { return sensitivities[currentController]; }
-			protected set { sensitivities[currentController] = value; }
+			set { sensitivities[currentController] = value; }
 		}
 		public new float dead {
 			get { return deads[currentController]; }
-			protected set { deads[currentController] = value; }
+			set { deads[currentController] = value; }
 		}
 
 		public bool[] snaps { get; private set; }
-		public bool[] inverteds { get; private set; }
+		public bool[] inverts { get; private set; }
 		public bool[] debugOnlys { get; private set; }
 		public new bool snap {
 			get { return snaps[currentController]; }
-			protected set { snaps[currentController] = value; }
+			set { snaps[currentController] = value; }
 		}
-		public new bool inverted {
-			get { return inverteds[currentController]; }
-			protected set { inverteds[currentController] = value; }
+		public new bool invert {
+			get { return inverts[currentController]; }
+			set { inverts[currentController] = value; }
 		}
 		public new bool debugOnly {
 			get { return debugOnlys[currentController]; }
-			protected set { debugOnlys[currentController] = value; }
+			set { debugOnlys[currentController] = value; }
 		}
 
 		public XboxControl() {
 			values = new float[4];
 			realValues = new float[4];
-			fixedValues = new byte[4];
+			fixedValues = new sbyte[4];
 
 			downs = new ControlState[4];
 			ups = new ControlState[4];
@@ -115,7 +109,7 @@ namespace BSGTools.IO.Xbox {
 			deads = new float[4];
 
 			snaps = new bool[4];
-			inverteds = new bool[4];
+			inverts = new bool[4];
 			debugOnlys = new bool[4];
 		}
 	}

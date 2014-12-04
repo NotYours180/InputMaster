@@ -8,7 +8,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b35a78f8e91bf6439c444289bb3057c, type: 3}
-  m_Name: New StandaloneControlConfig
+  m_Script: {fileID: 11500000, guid: a50e4198cd4f54146a1cea7b675faf1b, type: 3}
+  m_Name: New CombinedOutputsConfig
   m_EditorClassIdentifier: 
-  standaloneControls: []

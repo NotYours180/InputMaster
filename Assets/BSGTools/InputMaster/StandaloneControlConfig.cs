@@ -4,6 +4,6 @@ using System;
 
 namespace BSGTools.IO {
 	public class StandaloneControlConfig : ScriptableObject {
-		public List<StandaloneControl> controls;
+		public List<StandaloneControl> controls = new List<StandaloneControl>();
 	}
 }
