@@ -226,18 +226,18 @@ namespace BSGTools.IO {
 		public T GetControl<T>(string identifier) where T : Control {
 			T t = null;
 			if(t is StandaloneControl && standaloneConfig != null)
-				t = standaloneConfig.controls.SingleOrDefault(c => c.identifier == identifier) as T;
+				t = standaloneConfig.controls.Single(c => c.identifier == identifier) as T;
 			if(t == null && xboxConfig != null)
-				t = xboxConfig.SingleOrDefault(c => c.identifier == identifier) as T;
+				t = xboxConfig.Single(c => c.identifier == identifier) as T;
 			return t;
 		}
 
 		public Control GetControl(string identifier) {
 			Control t = null;
 			if(standaloneConfig != null)
-				t = standaloneConfig.controls.SingleOrDefault(c => c.identifier == identifier);
+				t = standaloneConfig.controls.Single(c => c.identifier == identifier);
 			if(t == null && xboxConfig != null)
-				t = xboxConfig.SingleOrDefault(c => c.identifier == identifier);
+				t = xboxConfig.Single(c => c.identifier == identifier);
 			return t;
 		}
 	}

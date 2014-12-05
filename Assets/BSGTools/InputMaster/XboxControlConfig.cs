@@ -58,6 +58,10 @@ namespace BSGTools.IO.Xbox {
 			return control;
 		}
 
+		public XboxControl Single(Func<XboxControl, bool> p) {
+			return Combine().Single(p);
+		}
+
 		public IEnumerable<TResult> LinqSelect<TResult>(Func<XboxControl, TResult> f) {
 			return xbControls.Cast<XboxControl>().Select(f).Concat(xsControls.Cast<XboxControl>().Select(f).Concat(xtControls.Cast<XboxControl>().Select(f)));
 		}

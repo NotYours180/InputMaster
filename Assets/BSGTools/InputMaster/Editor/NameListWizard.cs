@@ -34,7 +34,28 @@ namespace BSGTools.Editors {
 			ScriptableWizard.DisplayWizard<NameListWizard>("NameList Wizard", "Create NameList");
 		}
 
+		void OnWizardUpdate() {
+			List<string> names = new List<string>();
+			if(standaloneConfig != null)
+				names.AddRange(standaloneConfig.controls.Select(c => c.identifier));
+			if(xboxConfig != null)
+				names.AddRange(xboxConfig.LinqSelect(c => c.identifier));
+			if(combinedOutputsConfig != null)
+				names.AddRange(combinedOutputsConfig.outputs.Select(c => c.identifier));
+
+			if(names.Distinct().Count() != names.Count) {
+				errorString = "Cannot create NameList: Ensure that every control and CombinedOutput has a unique identifier.";
+				isValid = false;
+			}
+			else {
+				isValid = true;
+				errorString = string.Empty;
+			}
+		}
+
 		void OnWizardCreate() {
+
+
 			var templateText = File.ReadAllText(Application.dataPath + TEMPLATE, Encoding.Default);
 			var sb = new StringBuilder();
 
