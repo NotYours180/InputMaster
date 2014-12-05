@@ -42,13 +42,3 @@ MonoBehaviour:
     snap: 0
     positive: 304
     negative: 0
-  - identifier: printPosition
-    dead: 0
-    gravity: 1
-    sensitivity: 1
-    invert: 0
-    blocked: 0
-    debugOnly: 1
-    snap: 0
-    positive: 282
-    negative: 0

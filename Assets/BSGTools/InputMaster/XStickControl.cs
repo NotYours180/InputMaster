@@ -29,6 +29,8 @@ namespace BSGTools.IO.Xbox {
 			for(byte i = 0;i < 4;i++) {
 				currentController = i;
 				var gpState = XboxUtils.ControllerStates[currentController];
+				if(gpState.IsConnected == false)
+					continue;
 				var sticks = gpState.ThumbSticks;
 
 				if(stick == XStick.StickLeftX)
@@ -61,6 +63,7 @@ namespace BSGTools.IO.Xbox {
 				value = realValue;
 				fixedValue = GetFV();
 			}
+			currentController = 0;
 #endif
 		}
 

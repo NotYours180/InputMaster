@@ -26,9 +26,9 @@ namespace BSGTools.IO {
 	/// </summary>
 	[Flags]
 	public enum ControlState {
+		Neither = Positive & Negative,
 		Positive = 1 << 0,
 		Negative = 1 << 1,
-		Neither = Positive & Negative,
 		Both = Positive | Negative,
 		Either = Positive ^ Negative
 	}

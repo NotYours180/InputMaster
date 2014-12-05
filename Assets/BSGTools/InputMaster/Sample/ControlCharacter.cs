@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using BSGTools.IO;
+using BSGTools.IO.Xbox;
 
 public class ControlCharacter : MonoBehaviour {
 
@@ -17,22 +18,27 @@ public class ControlCharacter : MonoBehaviour {
 	// Update is called once per frame
 	void Update() {
 		var io = InputMaster.instance;
-		var moveFB = io.GetControl<StandaloneControl>(NameList.moveFB);
-		var strafe = io.GetControl<StandaloneControl>(NameList.strafe);
-		var sprint = io.GetControl<StandaloneControl>(NameList.sprint);
-		var printPosition = io.GetControl<StandaloneControl>(NameList.printPosition);
 
-		//print(strafe.value);
-		//print(moveFB.value);
+		var moveFB = io.GetControl<XStickControl>(NameList.xMoveFB);
+		var strafe = io.GetControl<XStickControl>(NameList.xStrafe);
+		var sprint = io.GetControl<XButtonControl>(NameList.xSprint);
+
+		moveFB.currentController = strafe.currentController = sprint.currentController = 0;
+
+		print(sprint.value);
+
 		var moveVal = moveFB.value * moveSpeed;
 		if(moveVal > 0f)
 			moveVal += sprintAdditive * sprint.value;
 		else if(moveVal < 0f)
 			moveVal -= sprintAdditive * sprint.value;
 
-		rb.velocity = new Vector3(strafe.value * strafeSpeed, rb.velocity.y, moveVal);
+		var strafeVal = strafe.value * strafeSpeed;
+		if(strafeVal > 0f)
+			strafeVal += sprintAdditive * sprint.value;
+		else if(strafeVal < 0f)
+			strafeVal -= sprintAdditive * sprint.value;
 
-		if(printPosition.down == ControlState.Positive)
-			print(transform.position);
+		rb.velocity = new Vector3(strafeVal, rb.velocity.y, moveVal);
 	}
 }

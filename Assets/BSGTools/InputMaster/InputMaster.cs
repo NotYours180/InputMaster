@@ -135,8 +135,9 @@ namespace BSGTools.IO {
 		public void ResetAll() {
 			foreach(var c in standaloneConfig.controls)
 				c.Reset();
-			foreach(var c in xboxConfig.controls)
+			xboxConfig.ForEach((c) => {
 				c.Reset();
+			});
 		}
 
 		/// <summary>
@@ -148,8 +149,9 @@ namespace BSGTools.IO {
 		public void SetBlockAll(bool blocked) {
 			foreach(var c in standaloneConfig.controls)
 				c.blocked = blocked;
-			foreach(var c in xboxConfig.controls)
+			xboxConfig.ForEach((c) => {
 				c.blocked = blocked;
+			});
 		}
 
 #if XBOX_ALLOWED
@@ -193,8 +195,9 @@ namespace BSGTools.IO {
 				foreach(var c in standaloneConfig.controls)
 					UpdateControl(c);
 			if(xboxConfig != null) {
-				foreach(var c in xboxConfig.controls)
+				xboxConfig.ForEach((c) => {
 					UpdateControl(c);
+				});
 			}
 		}
 
@@ -216,16 +219,16 @@ namespace BSGTools.IO {
 			if(standaloneConfig != null)
 				hasControl = standaloneConfig.controls.Any(c => c.identifier == identifier);
 			if(hasControl == false && xboxConfig != null)
-				hasControl = xboxConfig.controls.Any(c => c.identifier == identifier);
+				hasControl = xboxConfig.Any(c => c.identifier == identifier);
 			return hasControl;
 		}
 
 		public T GetControl<T>(string identifier) where T : Control {
 			T t = null;
-			if(typeof(T) == typeof(StandaloneControl) && standaloneConfig != null)
+			if(t is StandaloneControl && standaloneConfig != null)
 				t = standaloneConfig.controls.SingleOrDefault(c => c.identifier == identifier) as T;
-			if(t == null && typeof(T) == typeof(XboxControl) && xboxConfig != null)
-				t = xboxConfig.controls.SingleOrDefault(c => c.identifier == name) as T;
+			if(t == null && xboxConfig != null)
+				t = xboxConfig.SingleOrDefault(c => c.identifier == identifier) as T;
 			return t;
 		}
 
@@ -234,7 +237,7 @@ namespace BSGTools.IO {
 			if(standaloneConfig != null)
 				t = standaloneConfig.controls.SingleOrDefault(c => c.identifier == identifier);
 			if(t == null && xboxConfig != null)
-				t = xboxConfig.controls.SingleOrDefault(c => c.identifier == name);
+				t = xboxConfig.SingleOrDefault(c => c.identifier == identifier);
 			return t;
 		}
 	}

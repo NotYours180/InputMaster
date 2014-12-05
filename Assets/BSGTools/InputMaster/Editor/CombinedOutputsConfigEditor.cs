@@ -10,9 +10,7 @@ using BSGTools.IO.Xbox;
 namespace BSGTools.Editors {
 	[CustomEditor(typeof(CombinedOutputsConfig))]
 	public class CombinedOutputsConfigEditor : Editor {
-		public CombinedOutputsConfig coConfig;
-		public StandaloneControlConfig sConfig;
-		public XboxControlConfig xConfig;
+		public CombinedOutputsConfig config;
 		public Vector2 scroll;
 		public List<bool> foldouts;
 		public string filterStr;
@@ -21,8 +19,8 @@ namespace BSGTools.Editors {
 
 		void OnEnable() {
 			scroll = Vector2.zero;
-			coConfig = target as CombinedOutputsConfig;
-			foldouts = Enumerable.Repeat(false, coConfig.outputs.Count).ToList();
+			config = target as CombinedOutputsConfig;
+			foldouts = Enumerable.Repeat(false, config.outputs.Count).ToList();
 		}
 
 		public override void OnInspectorGUI() {
@@ -37,15 +35,15 @@ namespace BSGTools.Editors {
 
 			//Generate control name list
 			var names = new List<string>();
-			if(sConfig != null)
-				names.AddRange(sConfig.controls.Select(c => c.identifier));
-			if(xConfig != null)
-				names.AddRange(xConfig.controls.Select(c => c.identifier));
+			if(config.sConfig != null)
+				names.AddRange(config.sConfig.controls.Select(c => c.identifier));
+			if(config.xConfig != null)
+				names.AddRange(config.xConfig.LinqSelect(c => c.identifier));
 
-			for(int i = 0;i < coConfig.outputs.Count;i++) {
+			for(int i = 0;i < config.outputs.Count;i++) {
 				//Setup foldout
 				EditorGUI.indentLevel = 1;
-				var co = coConfig.outputs[i];
+				var co = config.outputs[i];
 				foldouts[i] = EditorGUILayout.Foldout(foldouts[i], (i + 1) + ": " + co.identifier);
 
 				if(foldouts[i]) {
@@ -61,11 +59,11 @@ namespace BSGTools.Editors {
 					if(selectableNames.Count == 0)
 						GUI.enabled = false;
 					var shouldAdd = GUILayout.Button("Add New") && co.identifiers.Count < names.Count;
-					GUI.enabled = true;
 					Mathf.Clamp(lastSelectedID, 0, selectableNames.Count);
 					lastSelectedID = EditorGUILayout.Popup(lastSelectedID, selectableNames.ToArray());
 					if(shouldAdd)
 						co.identifiers.Add(selectableNames[lastSelectedID]);
+					GUI.enabled = true;
 					EditorGUILayout.EndHorizontal();
 					EditorGUILayout.Separator();
 
@@ -98,19 +96,27 @@ namespace BSGTools.Editors {
 
 			EditorGUILayout.LabelField("CombinedOutputs Configuration", centeredBold);
 			EditorGUILayout.Space();
-			sConfig = (StandaloneControlConfig)EditorGUILayout.ObjectField("Standalone Config", sConfig, typeof(StandaloneControlConfig));
-			xConfig = (XboxControlConfig)EditorGUILayout.ObjectField("Xbox Config", xConfig, typeof(XboxControlConfig));
+			config.sConfig = (StandaloneControlConfig)EditorGUILayout.ObjectField("Standalone Config", config.sConfig, typeof(StandaloneControlConfig));
+			config.xConfig = (XboxControlConfig)EditorGUILayout.ObjectField("Xbox Config", config.xConfig, typeof(XboxControlConfig));
 			EditorGUILayout.Space();
+
 			EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button("New CombinedOutput")) {
-				coConfig.outputs.Add(new CombinedOutput());
+				config.outputs.Add(new CombinedOutput());
 				foldouts.Add(false);
 			}
 			if(GUILayout.Button("Remove All")) {
-				coConfig.outputs.Clear();
+				config.outputs.Clear();
 				foldouts.Clear();
 			}
+			if(GUILayout.Button("Expand All"))
+				for(int i = 0;i < foldouts.Count;i++)
+					foldouts[i] = true;
+			if(GUILayout.Button("Collapse All"))
+				for(int i = 0;i < foldouts.Count;i++)
+					foldouts[i] = false;
 			EditorGUILayout.EndHorizontal();
+
 			EditorGUILayout.Space();
 
 		}

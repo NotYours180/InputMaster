@@ -31,6 +31,9 @@ namespace BSGTools.IO.Xbox {
 			for(byte i = 0;i < 4;i++) {
 				currentController = i;
 				var gpState = XboxUtils.ControllerStates[currentController];
+				if(gpState.IsConnected == false)
+					continue;
+
 				var triggerVal = (trigger == XTrigger.TriggerLeft) ? gpState.Triggers.Left : gpState.Triggers.Right;
 
 				if(triggerVal > realValue)
@@ -40,6 +43,7 @@ namespace BSGTools.IO.Xbox {
 				else if(Mathf.Approximately(triggerVal, realValue))
 					held = ControlState.Positive;
 			}
+			currentController = 0;
 #endif
 		}
 
@@ -61,6 +65,7 @@ namespace BSGTools.IO.Xbox {
 				Reset();
 #endif
 			}
+			currentController = 0;
 		}
 	}
 

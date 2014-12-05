@@ -4,6 +4,7 @@ using XInputDotNetPure;
 #endif
 
 using System;
+using UnityEngine;
 
 namespace BSGTools.IO.Xbox {
 	/// <summary>
@@ -45,6 +46,9 @@ namespace BSGTools.IO.Xbox {
 			for(byte i = 0;i < 4;i++) {
 				currentController = i;
 				var gpState = XboxUtils.ControllerStates[currentController];
+				if(gpState.IsConnected == false)
+					continue;
+
 				var pos = (invert) ? negative : positive;
 				var neg = (invert) ? positive : negative;
 
@@ -82,7 +86,47 @@ namespace BSGTools.IO.Xbox {
 					reportedNegDown = false;
 				}
 			}
+			currentController = 0;
 #endif
+		}
+
+		protected override void UpdateValues() {
+			for(byte i = 0;i < 4;i++) {
+				currentController = i;
+				if(held.HasFlag(ControlState.Positive))
+					realValue += Time.deltaTime * sensitivity;
+				else if(realValue > 0f) {
+					realValue -= Time.deltaTime * sensitivity;
+					if(realValue < 0f)
+						realValue = 0f;
+				}
+				if(held.HasFlag(ControlState.Negative))
+					realValue -= Time.deltaTime * sensitivity;
+				else if(realValue < 0f) {
+					realValue += Time.deltaTime * sensitivity;
+					if(realValue > 0f)
+						realValue = 0f;
+				}
+
+				realValue = Mathf.Clamp(realValue, -1f, 1f);
+
+				if(held != ControlState.Both && snap) {
+					if(realValue > 0f && held.HasFlag(ControlState.Negative))
+						realValue = 0f;
+					else if(realValue < 0f && held.HasFlag(ControlState.Positive))
+						realValue = 0f;
+				}
+
+				value = realValue;
+
+				//We dont want to mess with the real value
+				//When considering dead values
+				if(Mathf.Abs(realValue) <= Mathf.Abs(dead))
+					value = 0f;
+
+				fixedValue = GetFV();
+			}
+			currentController = 0;
 		}
 
 #if XBOX_ALLOWED

@@ -175,7 +175,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!81 &280683317
 AudioListener:
   m_ObjectHideFlags: 0
@@ -366,7 +366,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   strafeSpeed: 3.5
-  sprintAdditive: 5
+  sprintAdditive: 100
 --- !u!54 &1166334079
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -532,8 +532,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   standaloneConfig: {fileID: 11400000, guid: 705bce5d2beb0ff46bc37a6650d12d5d, type: 2}
-  xboxConfig: {fileID: 11400000, guid: 91a41c1eeeff7aa4bb085a0413aa7bc5, type: 2}
-  combinedOutputs: {fileID: 0}
+  xboxConfig: {fileID: 11400000, guid: 1b37dcaeea1395d4b8f8fa64ce64a81c, type: 2}
+  combinedOutputs: {fileID: 11400000, guid: deac279f52d95824a99fd25ea8547037, type: 2}
   mouseXAxisName: 
   mouseYAxisName: 
   mouseWheelAxisName: 

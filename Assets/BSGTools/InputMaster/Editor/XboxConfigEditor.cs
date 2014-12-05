@@ -14,7 +14,7 @@ namespace BSGTools.Editors {
 		[SerializeField]
 		Vector2 scroll;
 		[SerializeField]
-		List<bool> foldouts;
+		List<bool> xbFoldouts, xsFoldouts, xtFoldouts;
 		[SerializeField]
 		string filterStr;
 		[SerializeField]
@@ -23,13 +23,12 @@ namespace BSGTools.Editors {
 		void OnEnable() {
 			scroll = Vector2.zero;
 			config = target as XboxControlConfig;
-			foldouts = Enumerable.Repeat(false, config.controls.Count).ToList();
+			xbFoldouts = Enumerable.Repeat(false, config.totalCount).ToList();
+			xsFoldouts = Enumerable.Repeat(false, config.totalCount).ToList();
+			xtFoldouts = Enumerable.Repeat(false, config.totalCount).ToList();
 		}
 
 		public override void OnInspectorGUI() {
-			config.controls.Sort(new Comparison<XboxControl>((xc1, xc2) => {
-				return xc1.GetType().Name.CompareTo(xc2.GetType().Name);
-			}));
 			DrawHeaderControls();
 			DrawControls();
 
@@ -39,66 +38,56 @@ namespace BSGTools.Editors {
 
 		void DrawControls() {
 			scroll = EditorGUILayout.BeginScrollView(scroll);
-
-			if(!filterAny || filterXB) {
-				EditorGUILayout.LabelField("XButtonControls", EditorStyles.boldLabel);
-				for(int i = 0;i < config.xbControls.Count;i++) {
-					var c = config.xbControls[i];
-					if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
-						continue;
-
-					EditorGUI.indentLevel = 1;
-					xbFoldouts[i] = EditorGUILayout.Foldout(xbFoldouts[i], (i + 1) + ": " + c.identifier);
-					if(xbFoldouts[i]) {
-						EditorGUI.indentLevel = 2;
-						if(DrawControl(c)) {
-							config.xbControls.RemoveAt(i);
-							xbFoldouts.RemoveAt(i);
-						}
-						//FixInvalidValues(c);
+			//XButtons
+			EditorGUI.indentLevel = 0;
+			EditorGUILayout.LabelField("XButtonControls", EditorStyles.boldLabel);
+			for(int i = 0;i < config.xbControls.Count;i++) {
+				var c = config.xbControls[i];
+				if(ShouldFilterOut(c))
+					continue;
+				EditorGUI.indentLevel = 1;
+				xbFoldouts[i] = EditorGUILayout.Foldout(xbFoldouts[i], string.Format("{0}: {1}", i + 1, c.identifier));
+				if(xbFoldouts[i]) {
+					EditorGUI.indentLevel = 2;
+					if(DrawControl(c)) {
+						config.xbControls.RemoveAt(i);
+						xbFoldouts.RemoveAt(i);
 					}
 				}
-				EditorGUILayout.Space();
 			}
 
-			if(!filterAny || filterXS) {
-				EditorGUI.indentLevel = 0;
-				EditorGUILayout.LabelField("XStickControls", EditorStyles.boldLabel);
-				for(int i = 0;i < config.xsControls.Count;i++) {
-					var c = config.xsControls[i];
-					if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
-						continue;
-
-					EditorGUI.indentLevel = 1;
-					xsFoldouts[i] = EditorGUILayout.Foldout(xsFoldouts[i], (i + 1) + ": " + c.identifier);
-					if(xsFoldouts[i]) {
-						EditorGUI.indentLevel = 2;
-						if(DrawControl(c)) {
-							config.xsControls.RemoveAt(i);
-							xsFoldouts.RemoveAt(i);
-						}
-						//FixInvalidValues(c);
+			//XSticks
+			EditorGUI.indentLevel = 0;
+			EditorGUILayout.LabelField("XStickControls", EditorStyles.boldLabel);
+			for(int i = 0;i < config.xsControls.Count;i++) {
+				var c = config.xsControls[i];
+				if(ShouldFilterOut(c))
+					continue;
+				EditorGUI.indentLevel = 1;
+				xsFoldouts[i] = EditorGUILayout.Foldout(xsFoldouts[i], string.Format("{0}: {1}", i + 1, c.identifier));
+				if(xsFoldouts[i]) {
+					EditorGUI.indentLevel = 2;
+					if(DrawControl(c)) {
+						config.xsControls.RemoveAt(i);
+						xsFoldouts.RemoveAt(i);
 					}
 				}
-				EditorGUILayout.Space();
 			}
 
-			if(!filterAny || filterXT) {
-				EditorGUI.indentLevel = 0;
-				EditorGUILayout.LabelField("XTriggerControls", EditorStyles.boldLabel);
-				for(int i = 0;i < config.xtControls.Count;i++) {
-					var c = config.xtControls[i];
-					if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
-						continue;
-
-					EditorGUI.indentLevel = 1;
-					xtFoldouts[i] = EditorGUILayout.Foldout(xtFoldouts[i], (i + 1) + ": " + c.identifier);
-					if(xtFoldouts[i]) {
-						EditorGUI.indentLevel = 2;
-						if(DrawControl(c)) {
-							config.xtControls.RemoveAt(i);
-							xtFoldouts.RemoveAt(i);
-						}
+			//XTrigger
+			EditorGUI.indentLevel = 0;
+			EditorGUILayout.LabelField("XTriggerControls", EditorStyles.boldLabel);
+			for(int i = 0;i < config.xtControls.Count;i++) {
+				var c = config.xtControls[i];
+				if(ShouldFilterOut(c))
+					continue;
+				EditorGUI.indentLevel = 1;
+				xtFoldouts[i] = EditorGUILayout.Foldout(xtFoldouts[i], string.Format("{0}: {1}", i + 1, c.identifier));
+				if(xtFoldouts[i]) {
+					EditorGUI.indentLevel = 2;
+					if(DrawControl(c)) {
+						config.xtControls.RemoveAt(i);
+						xtFoldouts.RemoveAt(i);
 					}
 				}
 			}
@@ -106,10 +95,25 @@ namespace BSGTools.Editors {
 			EditorGUILayout.EndScrollView();
 		}
 
+		//Returns true if the control shouldn't be shown due to filtering.
+		private bool ShouldFilterOut(XboxControl c) {
+			if(!string.IsNullOrEmpty(filterStr) && !c.identifier.ToLower().Contains(filterStr.ToLower()))
+				return true;
+			if(filterAny) {
+				if(filterXB && !(c is XButtonControl))
+					return true;
+				else if(filterXS && !(c is XStickControl))
+					return true;
+				else if(filterXT && !(c is XTriggerControl))
+					return true;
+			}
+			return false;
+		}
+
 		//Returns true if delete button is pressed.
 		bool DrawControl<T>(T c) where T : XboxControl {
 			GUILayout.BeginHorizontal();
-			GUILayout.Space(EditorGUI.indentLevel * 18);
+			GUILayoutIndent();
 			bool shouldDelete = GUILayout.Button("Delete");
 			GUILayout.EndHorizontal();
 			if(shouldDelete)
@@ -144,6 +148,14 @@ namespace BSGTools.Editors {
 			return false;
 		}
 
+		private static void GUILayoutIndent() {
+			GUILayoutIndent(EditorGUI.indentLevel);
+		}
+
+		private static void GUILayoutIndent(int indentLevel) {
+			GUILayout.Space(indentLevel * 18);
+		}
+
 		void DrawHeaderControls() {
 			EditorGUI.indentLevel = 0;
 			var centeredBold = GUI.skin.label;
@@ -162,15 +174,15 @@ namespace BSGTools.Editors {
 
 			EditorGUILayout.BeginVertical();
 			if(GUILayout.Button("New XBC")) {
-				config.xbControls.Add(new XButtonControl(XButton.A));
+				config.Add(new XButtonControl(XButton.A));
 				xbFoldouts.Add(false);
 			}
 			if(GUILayout.Button("New XSC")) {
-				config.xsControls.Add(new XStickControl(XStick.StickLeftX));
+				config.Add(new XStickControl(XStick.StickLeftX));
 				xsFoldouts.Add(false);
 			}
 			if(GUILayout.Button("New XTC")) {
-				config.xtControls.Add(new XTriggerControl(XTrigger.TriggerLeft));
+				config.Add(new XTriggerControl(XTrigger.TriggerLeft));
 				xtFoldouts.Add(false);
 			}
 			EditorGUILayout.EndVertical();

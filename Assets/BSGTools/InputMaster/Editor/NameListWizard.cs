@@ -44,11 +44,11 @@ namespace BSGTools.Editors {
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier),
 						c.identifier));
 			}
-			if(xboxConfig != null && xboxConfig.controls.Count != 0) {
+			if(xboxConfig != null && xboxConfig.totalCount != 0) {
 				sb.AppendLine();
 				sb.AppendLine("\t// Xbox Controls");
 
-				foreach(var c in xboxConfig.controls)
+				foreach(var c in xboxConfig.Combine())
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 			}
 			if(combinedOutputsConfig != null && combinedOutputsConfig.outputs.Count != 0) {
