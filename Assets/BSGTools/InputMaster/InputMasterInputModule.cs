@@ -59,10 +59,10 @@ namespace BSGTools.IO {
 			if(coUISubmit == null || coUICancel == null || coUIHorizontal == null || coUIVertical == null)
 				return false;
 
-			var shouldActivate = coUISubmit.FixedValue != 0;
-			shouldActivate |= coUICancel.FixedValue != 0;
-			shouldActivate |= !Mathf.Approximately(coUIHorizontal.Value, 0.0f);
-			shouldActivate |= !Mathf.Approximately(coUIVertical.Value, 0.0f);
+			var shouldActivate = coUISubmit.fixedValue != 0;
+			shouldActivate |= coUICancel.fixedValue != 0;
+			shouldActivate |= !Mathf.Approximately(coUIHorizontal.value, 0.0f);
+			shouldActivate |= !Mathf.Approximately(coUIVertical.value, 0.0f);
 			shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
 			shouldActivate |= Input.GetMouseButtonDown(0);
 			return shouldActivate;
@@ -110,25 +110,25 @@ namespace BSGTools.IO {
 				return false;
 
 			var data = GetBaseEventData();
-			if(coUISubmit.FixedValue != 0)
+			if(coUISubmit.fixedValue != 0)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.submitHandler);
 
-			if(coUICancel.FixedValue != 0)
+			if(coUICancel.fixedValue != 0)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.cancelHandler);
 			return data.used;
 		}
 
 		private bool AllowMoveEventProcessing(float time) {
-			bool allow = coUIHorizontal.FixedValue != 0;
-			allow |= coUIVertical.FixedValue != 0;
+			bool allow = coUIHorizontal.fixedValue != 0;
+			allow |= coUIVertical.fixedValue != 0;
 			allow |= (time > m_NextAction);
 			return allow;
 		}
 
 		private Vector2 GetRawMoveVector() {
 			Vector2 move = Vector2.zero;
-			move.x = coUIHorizontal.FixedValueF;
-			move.y = coUIVertical.FixedValueF;
+			move.x = coUIHorizontal.fixedValueF;
+			move.y = coUIVertical.fixedValueF;
 			return move;
 		}
 

@@ -14,8 +14,8 @@ MonoBehaviour:
   controls:
   - identifier: moveFB
     dead: 0
-    gravity: 3
-    sensitivity: 2
+    gravity: 1
+    sensitivity: 1
     invert: 0
     blocked: 0
     debugOnly: 0
@@ -24,8 +24,8 @@ MonoBehaviour:
     negative: 115
   - identifier: strafe
     dead: 0
-    gravity: 3
-    sensitivity: 2
+    gravity: 1
+    sensitivity: 1
     invert: 0
     blocked: 0
     debugOnly: 0
@@ -34,8 +34,8 @@ MonoBehaviour:
     negative: 97
   - identifier: sprint
     dead: 0
-    gravity: 1.5
-    sensitivity: .5
+    gravity: 1
+    sensitivity: 1
     invert: 0
     blocked: 0
     debugOnly: 0

@@ -54,8 +54,6 @@ namespace BSGTools.Editors {
 		}
 
 		void OnWizardCreate() {
-
-
 			var templateText = File.ReadAllText(Application.dataPath + TEMPLATE, Encoding.Default);
 			var sb = new StringBuilder();
 
@@ -69,7 +67,11 @@ namespace BSGTools.Editors {
 				sb.AppendLine();
 				sb.AppendLine("\t// Xbox Controls");
 
-				foreach(var c in xboxConfig.Combine())
+				foreach(var c in xboxConfig.xbControls)
+					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
+				foreach(var c in xboxConfig.xsControls)
+					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
+				foreach(var c in xboxConfig.xtControls)
 					sb.AppendLine("\t" + string.Format(CONST_FORMAT, provider.CreateValidIdentifier(c.identifier), c.identifier));
 			}
 			if(combinedOutputsConfig != null && combinedOutputsConfig.outputs.Count != 0) {

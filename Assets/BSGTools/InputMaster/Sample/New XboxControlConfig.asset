@@ -20,6 +20,38 @@ MonoBehaviour:
     blocked: 0
     debugOnly: 0
     snap: 0
+    values:
+    - 0
+    - 0
+    - 0
+    - 0
+    realValues:
+    - 0
+    - 0
+    - 0
+    - 0
+    fixedValues: 00000000
+    downs: 00000000000000000000000000000000
+    helds: 00000000000000000000000000000000
+    ups: 00000000000000000000000000000000
+    gravities:
+    - 1
+    - 0
+    - 0
+    - 0
+    sensitivities:
+    - 1
+    - 0
+    - 0
+    - 0
+    deads:
+    - 0
+    - 0
+    - 0
+    - 0
+    snaps: 00000000
+    inverts: 00000000
+    debugOnlys: 00000000
     positive: 10
     negative: 0
   xsControls:
@@ -31,6 +63,38 @@ MonoBehaviour:
     blocked: 0
     debugOnly: 0
     snap: 0
+    values:
+    - 0
+    - 0
+    - 0
+    - 0
+    realValues:
+    - 0
+    - 0
+    - 0
+    - 0
+    fixedValues: 00000000
+    downs: 00000000000000000000000000000000
+    helds: 00000000000000000000000000000000
+    ups: 00000000000000000000000000000000
+    gravities:
+    - 1
+    - 0
+    - 0
+    - 0
+    sensitivities:
+    - 1
+    - 0
+    - 0
+    - 0
+    deads:
+    - 0
+    - 0
+    - 0
+    - 0
+    snaps: 00000000
+    inverts: 00000000
+    debugOnlys: 00000000
     stick: 0
   - identifier: xMoveFB
     dead: 0
@@ -40,5 +104,37 @@ MonoBehaviour:
     blocked: 0
     debugOnly: 0
     snap: 0
+    values:
+    - 0
+    - 0
+    - 0
+    - 0
+    realValues:
+    - 0
+    - 0
+    - 0
+    - 0
+    fixedValues: 00000000
+    downs: 00000000000000000000000000000000
+    helds: 00000000000000000000000000000000
+    ups: 00000000000000000000000000000000
+    gravities:
+    - 1
+    - 0
+    - 0
+    - 0
+    sensitivities:
+    - 1
+    - 0
+    - 0
+    - 0
+    deads:
+    - 0
+    - 0
+    - 0
+    - 0
+    snaps: 00000000
+    inverts: 00000000
+    debugOnlys: 00000000
     stick: 1
   xtControls: []

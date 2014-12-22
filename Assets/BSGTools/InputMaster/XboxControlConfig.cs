@@ -21,14 +21,14 @@ namespace BSGTools.IO.Xbox {
 				a(c);
 		}
 
-		//public void For(Action<XboxControl> a) {
-		//	for(int i = 0;i < xbControls.Count;i++)
-		//		a(xbControls[i]);
-		//	for(int i = 0;i < xsControls.Count;i++)
-		//		a(xsControls[i]);
-		//	for(int i = 0;i < xtControls.Count;i++)
-		//		a(xtControls[i]);
-		//}
+		public void For(Action<XboxControl> a) {
+			for(int i = 0;i < xbControls.Count;i++)
+				a(xbControls[i]);
+			for(int i = 0;i < xsControls.Count;i++)
+				a(xsControls[i]);
+			for(int i = 0;i < xtControls.Count;i++)
+				a(xtControls[i]);
+		}
 
 		public void Add(XboxControl c) {
 			if(c is XButtonControl)
@@ -49,25 +49,8 @@ namespace BSGTools.IO.Xbox {
 			return xbControls.Cast<XboxControl>().Any(p) || xsControls.Cast<XboxControl>().Any(p) || xtControls.Cast<XboxControl>().Any(p);
 		}
 
-		public XboxControl SingleOrDefault(Func<XboxControl, bool> p) {
-			var control = xbControls.Cast<XboxControl>().SingleOrDefault(p);
-			if(control == null)
-				control = xsControls.Cast<XboxControl>().SingleOrDefault(p);
-			if(control == null)
-				control = xtControls.Cast<XboxControl>().SingleOrDefault(p);
-			return control;
-		}
-
-		public XboxControl Single(Func<XboxControl, bool> p) {
-			return Combine().Single(p);
-		}
-
 		public IEnumerable<TResult> LinqSelect<TResult>(Func<XboxControl, TResult> f) {
 			return xbControls.Cast<XboxControl>().Select(f).Concat(xsControls.Cast<XboxControl>().Select(f).Concat(xtControls.Cast<XboxControl>().Select(f)));
-		}
-
-		public IEnumerable<XboxControl> Combine() {
-			return xbControls.Cast<XboxControl>().Concat(xsControls.Cast<XboxControl>().Concat(xtControls.Cast<XboxControl>()));
 		}
 	}
 }

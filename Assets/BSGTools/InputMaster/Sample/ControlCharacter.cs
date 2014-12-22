@@ -7,6 +7,8 @@ public class ControlCharacter : MonoBehaviour {
 
 	[SerializeField]
 	float moveSpeed, strafeSpeed, sprintAdditive;
+	[SerializeField, Range(0, 3)]
+	byte controller = 0;
 
 	Rigidbody rb;
 
@@ -19,13 +21,11 @@ public class ControlCharacter : MonoBehaviour {
 	void Update() {
 		var io = InputMaster.instance;
 
-		var moveFB = io.GetControl<XStickControl>(NameList.xMoveFB);
-		var strafe = io.GetControl<XStickControl>(NameList.xStrafe);
-		var sprint = io.GetControl<XButtonControl>(NameList.xSprint);
+		var moveFB = io.GetCombinedOutput(NameList.coMoveFB);
+		var strafe = io.GetCombinedOutput(NameList.coStrafe);
+		var sprint = io.GetCombinedOutput(NameList.coSprint);
 
-		moveFB.currentController = strafe.currentController = sprint.currentController = 0;
-
-		print(sprint.value);
+		moveFB.controllerIndex = strafe.controllerIndex = sprint.controllerIndex = controller;
 
 		var moveVal = moveFB.value * moveSpeed;
 		if(moveVal > 0f)

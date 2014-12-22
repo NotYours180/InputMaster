@@ -11,5 +11,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a50e4198cd4f54146a1cea7b675faf1b, type: 3}
   m_Name: New CombinedOutputsConfig
   m_EditorClassIdentifier: 
+  outputs:
+  - identifier: coMoveFB
+    controllerIndex: 0
+  - identifier: coStrafe
+    controllerIndex: 0
+  - identifier: coSprint
+    controllerIndex: 0
   sConfig: {fileID: 11400000, guid: 705bce5d2beb0ff46bc37a6650d12d5d, type: 2}
   xConfig: {fileID: 11400000, guid: 1b37dcaeea1395d4b8f8fa64ce64a81c, type: 2}

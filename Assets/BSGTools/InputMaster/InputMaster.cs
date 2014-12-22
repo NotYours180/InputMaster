@@ -217,28 +217,90 @@ namespace BSGTools.IO {
 		public bool HasControl(string identifier) {
 			bool hasControl = false;
 			if(standaloneConfig != null)
-				hasControl = standaloneConfig.controls.Any(c => c.identifier == identifier);
+				hasControl = standaloneConfig.controls.Any(c1 => c1.identifier == identifier);
 			if(hasControl == false && xboxConfig != null)
-				hasControl = xboxConfig.Any(c => c.identifier == identifier);
+				hasControl = xboxConfig.Any(c1 => c1.identifier == identifier);
 			return hasControl;
 		}
 
 		public T GetControl<T>(string identifier) where T : Control {
-			T t = null;
-			if(t is StandaloneControl && standaloneConfig != null)
-				t = standaloneConfig.controls.Single(c => c.identifier == identifier) as T;
-			if(t == null && xboxConfig != null)
-				t = xboxConfig.Single(c => c.identifier == identifier) as T;
-			return t;
+			// Get first StandaloneControl
+			if(standaloneConfig != null && typeof(T) == typeof(StandaloneControl)) {
+				for(int i = 0;i < combinedOutputs.outputs.Count;i++) {
+					if(standaloneConfig.controls[i].identifier == identifier)
+						return standaloneConfig.controls[i] as T;
+				}
+			}
+			if(xboxConfig != null) {
+				// Get first XButtonControl
+				if(typeof(T) == typeof(XButtonControl)) {
+					for(int i = 0;i < xboxConfig.xbControls.Count;i++) {
+						var xb = xboxConfig.xbControls[i];
+						if(xb.identifier == identifier)
+							return xb as T;
+					}
+				}
+
+				// Get first XStickControl
+				else if(typeof(T) == typeof(XStickControl)) {
+					for(int i = 0;i < xboxConfig.xsControls.Count;i++) {
+						var xs = xboxConfig.xsControls[i];
+						if(xs.identifier == identifier)
+							return xs as T;
+					}
+				}
+
+				// If not found, get first XTriggerControl
+				else if(typeof(T) == typeof(XTriggerControl)) {
+					for(int i = 0;i < xboxConfig.xtControls.Count;i++) {
+						var xt = xboxConfig.xtControls[i];
+						if(xt.identifier == identifier)
+							return xt as T;
+					}
+				}
+			}
+			return null;
 		}
 
 		public Control GetControl(string identifier) {
-			Control t = null;
-			if(standaloneConfig != null)
-				t = standaloneConfig.controls.Single(c => c.identifier == identifier);
-			if(t == null && xboxConfig != null)
-				t = xboxConfig.Single(c => c.identifier == identifier);
-			return t;
+			// Get first StandaloneControl
+			if(standaloneConfig != null) {
+				for(int i = 0;i < combinedOutputs.outputs.Count;i++) {
+					if(standaloneConfig.controls[i].identifier == identifier)
+						return standaloneConfig.controls[i];
+				}
+			}
+			if(xboxConfig != null) {
+				// Get first XButtonControl
+				for(int i = 0;i < xboxConfig.xbControls.Count;i++) {
+					var xb = xboxConfig.xbControls[i];
+					if(xb.identifier == identifier)
+						return xb;
+				}
+
+				// Get first XStickControl
+				for(int i = 0;i < xboxConfig.xsControls.Count;i++) {
+					var xs = xboxConfig.xsControls[i];
+					if(xs.identifier == identifier)
+						return xs;
+				}
+
+				// If not found, get first XTriggerControl
+				for(int i = 0;i < xboxConfig.xtControls.Count;i++) {
+					var xt = xboxConfig.xtControls[i];
+					if(xt.identifier == identifier)
+						return xt;
+				}
+			}
+			return null;
+		}
+
+		public CombinedOutput GetCombinedOutput(string identifier) {
+			for(int i = 0;i < combinedOutputs.outputs.Count;i++)
+				if(combinedOutputs.outputs[i].identifier == identifier)
+					return combinedOutputs.outputs[i];
+
+			return null;
 		}
 	}
 }

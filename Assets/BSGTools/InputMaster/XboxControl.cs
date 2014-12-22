@@ -31,9 +31,9 @@ namespace BSGTools.IO.Xbox {
 		public byte currentController { get; set; }
 
 
-		public float[] values { get; private set; }
-		public float[] realValues { get; private set; }
-		public sbyte[] fixedValues { get; private set; }
+		public float[] values = new float[4];
+		public float[] realValues = new float[4];
+		public sbyte[] fixedValues = new sbyte[4];
 		public new float value {
 			get { return values[currentController]; }
 			protected set { values[currentController] = value; }
@@ -47,9 +47,9 @@ namespace BSGTools.IO.Xbox {
 			protected set { fixedValues[currentController] = value; }
 		}
 
-		public ControlState[] downs { get; private set; }
-		public ControlState[] helds { get; private set; }
-		public ControlState[] ups { get; private set; }
+		public ControlState[] downs = new ControlState[4];
+		public ControlState[] helds = new ControlState[4];
+		public ControlState[] ups = new ControlState[4];
 		public new ControlState down {
 			get { return downs[currentController]; }
 			protected set { downs[currentController] = value; }
@@ -63,9 +63,9 @@ namespace BSGTools.IO.Xbox {
 			protected set { ups[currentController] = value; }
 		}
 
-		public float[] gravities { get; private set; }
-		public float[] sensitivities { get; private set; }
-		public float[] deads { get; private set; }
+		public float[] gravities = new float[4];
+		public float[] sensitivities = new float[4];
+		public float[] deads = new float[4];
 		public new float gravity {
 			get { return gravities[currentController]; }
 			set { gravities[currentController] = value; }
@@ -79,9 +79,9 @@ namespace BSGTools.IO.Xbox {
 			set { deads[currentController] = value; }
 		}
 
-		public bool[] snaps { get; private set; }
-		public bool[] inverts { get; private set; }
-		public bool[] debugOnlys { get; private set; }
+		public bool[] snaps = new bool[4];
+		public bool[] inverts = new bool[4];
+		public bool[] debugOnlys = new bool[4];
 		public new bool snap {
 			get { return snaps[currentController]; }
 			set { snaps[currentController] = value; }
@@ -93,24 +93,6 @@ namespace BSGTools.IO.Xbox {
 		public new bool debugOnly {
 			get { return debugOnlys[currentController]; }
 			set { debugOnlys[currentController] = value; }
-		}
-
-		public XboxControl() {
-			values = new float[4];
-			realValues = new float[4];
-			fixedValues = new sbyte[4];
-
-			downs = new ControlState[4];
-			ups = new ControlState[4];
-			helds = new ControlState[4];
-
-			gravities = new float[4];
-			sensitivities = new float[4];
-			deads = new float[4];
-
-			snaps = new bool[4];
-			inverts = new bool[4];
-			debugOnlys = new bool[4];
 		}
 	}
 }

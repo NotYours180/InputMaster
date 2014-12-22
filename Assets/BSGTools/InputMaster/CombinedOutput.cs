@@ -25,6 +25,7 @@ namespace BSGTools.IO {
 	/// <summary>
 	/// Allows for easy combination of multiple controls' outputs.
 	/// </summary>
+	[Serializable]
 	public class CombinedOutput {
 		public delegate float OnAddPost();
 		public event OnAddPost AddPostClamped;
@@ -33,7 +34,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// The clamped, combined FixedValue as a float.
 		/// </value>
-		public float FixedValueF {
+		public float fixedValueF {
 			get {
 				var controls = this.controls;
 				foreach(var c in controls.OfType<XboxControl>())
@@ -55,7 +56,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// The clamped, combined FixedValue.
 		/// </value>
-		public sbyte FixedValue {
+		public sbyte fixedValue {
 			get {
 				var controls = this.controls;
 				foreach(var c in controls.OfType<XboxControl>())
@@ -77,7 +78,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// The clamped, combined Value.
 		/// </value>
-		public float Value {
+		public float value {
 			get {
 				var controls = this.controls;
 				foreach(var c in controls.OfType<XboxControl>())
@@ -100,7 +101,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// Are any controls in a Down+ state?
 		/// </value>
-		public bool AnyDownPositive {
+		public bool anyDownPositive {
 			get {
 				return controls.Any(c => c.down == ControlState.Positive);
 			}
@@ -108,7 +109,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// Are any controls in a Down- state?
 		/// </value>
-		public bool AnyDownNegative {
+		public bool anyDownNegative {
 			get {
 				return controls.Any(c => c.down == ControlState.Negative);
 			}
@@ -117,7 +118,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// Are any controls in a Held+ state?
 		/// </value>
-		public bool AnyHeldPositive {
+		public bool anyHeldPositive {
 			get {
 				return controls.Any(c => c.held == ControlState.Positive);
 			}
@@ -125,7 +126,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// Are any controls in a Held- state?
 		/// </value>
-		public bool AnyHeldNegative {
+		public bool anyHeldNegative {
 			get {
 				return controls.Any(c => c.held == ControlState.Negative);
 			}
@@ -134,7 +135,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// Are any controls in a Up+ state?
 		/// </value>
-		public bool AnyUpPositive {
+		public bool anyUpPositive {
 			get {
 				return controls.Any(c => c.up == ControlState.Positive);
 			}
@@ -142,7 +143,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// Are any controls in a Up- state?
 		/// </value>
-		public bool AnyUpNegative {
+		public bool anyUpNegative {
 			get {
 				return controls.Any(c => c.up == ControlState.Negative);
 			}
@@ -163,10 +164,10 @@ namespace BSGTools.IO {
 		public string identifier = "new_" + Guid.NewGuid().ToString().ToUpper().Split('-')[0];
 		public byte controllerIndex = 0;
 
-		Control[] controls {
+		IEnumerable<Control> controls {
 			get {
 				var io = InputMaster.instance;
-				return identifiers.Select(s => io.GetControl<Control>(s)).ToArray();
+				return identifiers.Select(s => io.GetControl(s));
 			}
 		}
 

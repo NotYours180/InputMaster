@@ -15,12 +15,13 @@ namespace BSGTools.Editors {
 		public List<bool> foldouts;
 		public string filterStr;
 		public bool filterFoldout;
-		public int lastSelectedID = 0;
+		public List<int> lastSelectedID;
 
 		void OnEnable() {
 			scroll = Vector2.zero;
 			config = target as CombinedOutputsConfig;
 			foldouts = Enumerable.Repeat(false, config.outputs.Count).ToList();
+			lastSelectedID = Enumerable.Repeat(0, config.outputs.Count).ToList();
 		}
 
 		public override void OnInspectorGUI() {
@@ -59,10 +60,10 @@ namespace BSGTools.Editors {
 					if(selectableNames.Count == 0)
 						GUI.enabled = false;
 					var shouldAdd = GUILayout.Button("Add New") && co.identifiers.Count < names.Count;
-					Mathf.Clamp(lastSelectedID, 0, selectableNames.Count);
-					lastSelectedID = EditorGUILayout.Popup(lastSelectedID, selectableNames.ToArray());
+					lastSelectedID[i] = Mathf.Clamp(lastSelectedID[i], 0, selectableNames.Count);
+					lastSelectedID[i] = EditorGUILayout.Popup(lastSelectedID[i], selectableNames.ToArray());
 					if(shouldAdd)
-						co.identifiers.Add(selectableNames[lastSelectedID]);
+						co.identifiers.Add(selectableNames[lastSelectedID[i]]);
 					GUI.enabled = true;
 					EditorGUILayout.EndHorizontal();
 					EditorGUILayout.Separator();
@@ -104,10 +105,12 @@ namespace BSGTools.Editors {
 			if(GUILayout.Button("New CombinedOutput")) {
 				config.outputs.Add(new CombinedOutput());
 				foldouts.Add(false);
+				lastSelectedID.Add(0);
 			}
 			if(GUILayout.Button("Remove All")) {
 				config.outputs.Clear();
 				foldouts.Clear();
+				lastSelectedID.Clear();
 			}
 			if(GUILayout.Button("Expand All"))
 				for(int i = 0;i < foldouts.Count;i++)
