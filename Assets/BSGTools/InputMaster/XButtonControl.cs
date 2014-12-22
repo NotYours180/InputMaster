@@ -93,14 +93,14 @@ namespace BSGTools.IO.Xbox {
 		protected override void UpdateValues() {
 			for(byte i = 0;i < 4;i++) {
 				currentController = i;
-				if(held.HasFlag(ControlState.Positive))
+				if((held & ControlState.Positive) != 0)
 					realValue += Time.deltaTime * sensitivity;
 				else if(realValue > 0f) {
 					realValue -= Time.deltaTime * sensitivity;
 					if(realValue < 0f)
 						realValue = 0f;
 				}
-				if(held.HasFlag(ControlState.Negative))
+				if((held & ControlState.Negative) != 0)
 					realValue -= Time.deltaTime * sensitivity;
 				else if(realValue < 0f) {
 					realValue += Time.deltaTime * sensitivity;
@@ -111,9 +111,9 @@ namespace BSGTools.IO.Xbox {
 				realValue = Mathf.Clamp(realValue, -1f, 1f);
 
 				if(held != ControlState.Both && snap) {
-					if(realValue > 0f && held.HasFlag(ControlState.Negative))
+					if(realValue > 0f && (held & ControlState.Negative) != 0)
 						realValue = 0f;
-					else if(realValue < 0f && held.HasFlag(ControlState.Positive))
+					else if(realValue < 0f && (held & ControlState.Positive) != 0)
 						realValue = 0f;
 				}
 

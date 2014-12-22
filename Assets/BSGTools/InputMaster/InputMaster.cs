@@ -31,23 +31,6 @@ using UnityEngine;
 namespace BSGTools.IO {
 
 	/// <summary>
-	/// Simple extensions class for commonly used enum functionality.
-	/// </summary>
-	public static class EnumExt {
-
-		/// <summary>
-		/// Similar to .NET 4.0+'s method to check if a flag is set on an enum.
-		/// </summary>
-		/// <param name="value">The current value.</param>
-		/// <param name="flag">The flag to check.</param>
-		/// <returns></returns>
-		public static bool HasFlag(this Enum value, Enum flag) {
-			return (Convert.ToInt64(value) & Convert.ToInt64(flag)) != 0;
-		}
-
-	}
-
-	/// <summary>
 	/// A single instance of this exists in the application.
 	/// Updates and maintains all Control states.
 	/// </summary>
@@ -195,7 +178,7 @@ namespace BSGTools.IO {
 				foreach(var c in standaloneConfig.controls)
 					UpdateControl(c);
 			if(xboxConfig != null) {
-				xboxConfig.ForEach((c) => {
+				xboxConfig.For((c) => {
 					UpdateControl(c);
 				});
 			}
@@ -205,11 +188,11 @@ namespace BSGTools.IO {
 			if((c.debugOnly && Debug.isDebugBuild) || c.debugOnly == false) {
 				c.Update();
 
-				if(c.down.HasFlag(ControlState.Either))
+				if((c.down & ControlState.Either) != 0)
 					anyControlDown = true;
-				if(c.held.HasFlag(ControlState.Either))
+				if((c.held & ControlState.Either) != 0)
 					anyControlHeld = true;
-				if(c.up.HasFlag(ControlState.Either))
+				if((c.up & ControlState.Either) != 0)
 					anyControlUp = true;
 			}
 		}
