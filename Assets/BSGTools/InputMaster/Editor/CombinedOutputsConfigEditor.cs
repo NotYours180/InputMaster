@@ -50,13 +50,24 @@ namespace BSGTools.Editors {
 				if(foldouts[i]) {
 					//Header controls
 					EditorGUI.indentLevel = 2;
+					GUILayout.BeginHorizontal();
+					EditorExts.GUILayoutIndent(2);
+					var shouldDel = GUILayout.Button("Delete");
+					GUILayout.EndHorizontal();
+					if(shouldDel && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to delete this output?", "DELETE", "CANCEL")) {
+						config.outputs.RemoveAt(i);
+						foldouts.RemoveAt(i);
+						lastSelectedID.RemoveAt(i);
+						break;
+					}
+
 					co.identifier = EditorGUILayout.TextField("Identifier", co.identifier);
 					co.controllerIndex = (byte)EditorGUILayout.IntSlider(new GUIContent("Controller", "The index of the controller to get Xbox control values from."), co.controllerIndex, 0, 3);
 
 					//Identifier selector and button
 					var selectableNames = names.Where(s => !co.identifiers.Contains(s)).ToList();
 					EditorGUILayout.BeginHorizontal();
-					GUILayout.Space(EditorGUI.indentLevel * 18);
+					EditorExts.GUILayoutIndent();
 					if(selectableNames.Count == 0)
 						GUI.enabled = false;
 					var shouldAdd = GUILayout.Button("Add New") && co.identifiers.Count < names.Count;
@@ -72,17 +83,20 @@ namespace BSGTools.Editors {
 					EditorGUI.indentLevel = 3;
 					for(int ii = 0;ii < co.identifiers.Count;ii++) {
 						var idAt = co.identifiers[ii];
+
+						//delete if no longer a valid ID
 						if(names.Contains(idAt) == false) {
 							co.identifiers.RemoveAt(ii);
 							continue;
 						}
 						EditorGUILayout.BeginHorizontal();
-						GUILayout.Space(EditorGUI.indentLevel * 18);
+						EditorExts.GUILayoutIndent();
 						if(GUILayout.Button("Delete"))
 							co.identifiers.RemoveAt(ii);
 						EditorGUILayout.LabelField(idAt);
 						EditorGUILayout.EndHorizontal();
 					}
+					EditorGUILayout.Separator();
 				}
 			}
 			EditorGUI.indentLevel = 0;
@@ -102,16 +116,19 @@ namespace BSGTools.Editors {
 			EditorGUILayout.Space();
 
 			EditorGUILayout.BeginHorizontal();
-			if(GUILayout.Button("New CombinedOutput")) {
+			if(GUILayout.Button("New Output")) {
 				config.outputs.Add(new CombinedOutput());
 				foldouts.Add(false);
 				lastSelectedID.Add(0);
 			}
-			if(GUILayout.Button("Remove All")) {
+			if(GUILayout.Button("Delete All") && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to DELETE ALL OUTPUTS?", "DELETE ALL", "CANCEL")) {
 				config.outputs.Clear();
 				foldouts.Clear();
 				lastSelectedID.Clear();
 			}
+			EditorGUILayout.EndHorizontal();
+
+			EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button("Expand All"))
 				for(int i = 0;i < foldouts.Count;i++)
 					foldouts[i] = true;
@@ -121,7 +138,6 @@ namespace BSGTools.Editors {
 			EditorGUILayout.EndHorizontal();
 
 			EditorGUILayout.Space();
-
 		}
 
 

@@ -159,7 +159,7 @@ namespace BSGTools.IO {
 		/// <value>
 		/// The combined Controls.
 		/// </value>
-		public List<string> identifiers { get; private set; }
+		public List<string> identifiers = new List<string>();
 
 		public string identifier = "new_" + Guid.NewGuid().ToString().ToUpper().Split('-')[0];
 		public byte controllerIndex = 0;
@@ -169,14 +169,6 @@ namespace BSGTools.IO {
 				var io = InputMaster.instance;
 				return identifiers.Select(s => io.GetControl(s));
 			}
-		}
-
-		/// <summary>
-		/// Creates a new CombinedOutput.
-		/// </summary>
-		/// <param name="controls">The controls to combine into a single output.</param>
-		public CombinedOutput() {
-			identifiers = new List<string>();
-		}
+		} 
 	}
 }

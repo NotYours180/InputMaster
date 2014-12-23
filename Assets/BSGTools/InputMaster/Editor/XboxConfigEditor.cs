@@ -49,7 +49,7 @@ namespace BSGTools.Editors {
 				xbFoldouts[i] = EditorGUILayout.Foldout(xbFoldouts[i], string.Format("{0}: {1}", i + 1, c.identifier));
 				if(xbFoldouts[i]) {
 					EditorGUI.indentLevel = 2;
-					if(DrawControl(c)) {
+					if(DrawControl(c) && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to delete this control?", "DELETE", "CANCEL")) {
 						config.xbControls.RemoveAt(i);
 						xbFoldouts.RemoveAt(i);
 					}
@@ -67,7 +67,7 @@ namespace BSGTools.Editors {
 				xsFoldouts[i] = EditorGUILayout.Foldout(xsFoldouts[i], string.Format("{0}: {1}", i + 1, c.identifier));
 				if(xsFoldouts[i]) {
 					EditorGUI.indentLevel = 2;
-					if(DrawControl(c)) {
+					if(DrawControl(c) && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to delete this control?", "DELETE", "CANCEL")) {
 						config.xsControls.RemoveAt(i);
 						xsFoldouts.RemoveAt(i);
 					}
@@ -85,7 +85,7 @@ namespace BSGTools.Editors {
 				xtFoldouts[i] = EditorGUILayout.Foldout(xtFoldouts[i], string.Format("{0}: {1}", i + 1, c.identifier));
 				if(xtFoldouts[i]) {
 					EditorGUI.indentLevel = 2;
-					if(DrawControl(c)) {
+					if(DrawControl(c) && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to delete this control?", "DELETE", "CANCEL")) {
 						config.xtControls.RemoveAt(i);
 						xtFoldouts.RemoveAt(i);
 					}
@@ -188,15 +188,15 @@ namespace BSGTools.Editors {
 			EditorGUILayout.EndVertical();
 
 			EditorGUILayout.BeginVertical();
-			if(GUILayout.Button("Remove All")) {
+			if(GUILayout.Button("Remove All") && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to DELETE ALL XBCONTROLS?", "DELETE ALL", "CANCEL")) {
 				config.xbControls.Clear();
 				xbFoldouts.Clear();
 			}
-			if(GUILayout.Button("Remove All")) {
+			if(GUILayout.Button("Remove All") && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to DELETE ALL XSCONTROLS?", "DELETE ALL", "CANCEL")) {
 				config.xsControls.Clear();
 				xsFoldouts.Clear();
 			}
-			if(GUILayout.Button("Remove All")) {
+			if(GUILayout.Button("Remove All") && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to DELETE ALL XTCONTROLS?", "DELETE ALL", "CANCEL")) {
 				config.xtControls.Clear();
 				xtFoldouts.Clear();
 			}

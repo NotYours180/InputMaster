@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8a7abe839a0ca844cb110bb7ddf1f017, type: 3}
-  m_Name: New XboxControlConfig
+  m_Name: SampleXCC
   m_EditorClassIdentifier: 
   xbControls:
   - identifier: xSprint

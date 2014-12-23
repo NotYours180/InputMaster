@@ -46,7 +46,7 @@ namespace BSGTools.Editors {
 				foldouts[i] = EditorGUILayout.Foldout(foldouts[i], (i + 1) + ": " + c.identifier);
 				if(foldouts[i]) {
 					EditorGUI.indentLevel = 2;
-					if(DrawControl(c)) {
+					if(DrawControl(c) && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to delete this control?", "DELETE", "CANCEL")) {
 						config.controls.RemoveAt(i);
 						foldouts.RemoveAt(i);
 					}
@@ -67,7 +67,7 @@ namespace BSGTools.Editors {
 		//Returns true if delete button is pressed.
 		bool DrawControl(StandaloneControl c) {
 			GUILayout.BeginHorizontal();
-			GUILayout.Space(EditorGUI.indentLevel * 18);
+			EditorExts.GUILayoutIndent();
 			bool shouldDelete = GUILayout.Button("Delete");
 			GUILayout.EndHorizontal();
 			if(shouldDelete)
@@ -109,7 +109,7 @@ namespace BSGTools.Editors {
 				config.controls.Add(new StandaloneControl(KeyCode.A));
 				foldouts.Add(false);
 			}
-			if(GUILayout.Button("Remove All")) {
+			if(GUILayout.Button("Remove All") && EditorUtility.DisplayDialog("Confirm", "Are you sure you'd like to DELETE ALL CONTROLS?", "DELETE ALL", "CANCEL")) {
 				config.controls.Clear();
 				foldouts.Clear();
 			}

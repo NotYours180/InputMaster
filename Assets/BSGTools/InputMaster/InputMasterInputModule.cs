@@ -23,7 +23,12 @@ namespace BSGTools.IO {
 			get { return m_CurrentInputMode; }
 		}
 
-		public CombinedOutput coUIHorizontal, coUIVertical, coUISubmit, coUICancel;
+		public string horizontal, vertical, submit, cancel;
+
+		CombinedOutput coUIHorizontal, coUIVertical, coUISubmit, coUICancel;
+
+		public GameObject lastHighlighted { get; private set; }
+		public bool highlightChanged { get; private set; }
 
 		[SerializeField]
 		private float m_InputActionsPerSecond = 10;
@@ -42,6 +47,12 @@ namespace BSGTools.IO {
 		}
 
 		public override void UpdateModule() {
+			var io = InputMaster.instance;
+			coUISubmit = io.GetCombinedOutput(submit);
+			coUIVertical = io.GetCombinedOutput(vertical);
+			coUIHorizontal = io.GetCombinedOutput(horizontal);
+			coUICancel = io.GetCombinedOutput(cancel);
+
 			m_LastMousePosition = m_MousePosition;
 			m_MousePosition = Input.mousePosition;
 		}
@@ -55,8 +66,6 @@ namespace BSGTools.IO {
 
 		public override bool ShouldActivateModule() {
 			if(!base.ShouldActivateModule())
-				return false;
-			if(coUISubmit == null || coUICancel == null || coUIHorizontal == null || coUIVertical == null)
 				return false;
 
 			var shouldActivate = coUISubmit.fixedValue != 0;
@@ -246,6 +255,8 @@ namespace BSGTools.IO {
 		private void ProcessMousePress(MouseButtonEventData data) {
 			var pointerEvent = data.buttonData;
 			var currentOverGo = pointerEvent.pointerCurrentRaycast.gameObject;
+			highlightChanged = currentOverGo != lastHighlighted;
+			lastHighlighted = currentOverGo;
 
 			// PointerDown notification
 			if(data.PressedThisFrame()) {

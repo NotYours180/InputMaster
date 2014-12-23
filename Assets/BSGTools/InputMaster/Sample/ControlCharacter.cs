@@ -21,9 +21,9 @@ public class ControlCharacter : MonoBehaviour {
 	void Update() {
 		var io = InputMaster.instance;
 
-		var moveFB = io.GetCombinedOutput(NameList.coMoveFB);
-		var strafe = io.GetCombinedOutput(NameList.coStrafe);
-		var sprint = io.GetCombinedOutput(NameList.coSprint);
+		var moveFB = io.GetCombinedOutput(SampleNameList.coMoveFB);
+		var strafe = io.GetCombinedOutput(SampleNameList.coStrafe);
+		var sprint = io.GetCombinedOutput(SampleNameList.coSprint);
 
 		moveFB.controllerIndex = strafe.controllerIndex = sprint.controllerIndex = controller;
 

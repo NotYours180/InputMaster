@@ -20,6 +20,7 @@ using XInputDotNetPure;
 
 using System;
 using UnityEngine;
+using System.Linq;
 
 namespace BSGTools.IO.Xbox {
 	/// <value>
@@ -63,8 +64,8 @@ namespace BSGTools.IO.Xbox {
 			protected set { ups[currentController] = value; }
 		}
 
-		public float[] gravities = new float[4];
-		public float[] sensitivities = new float[4];
+		public float[] gravities = Enumerable.Repeat(1f, 4).ToArray();
+		public float[] sensitivities = Enumerable.Repeat(1f, 4).ToArray();
 		public float[] deads = new float[4];
 		public new float gravity {
 			get { return gravities[currentController]; }

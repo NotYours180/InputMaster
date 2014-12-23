@@ -1,4 +1,4 @@
-public static class NameList {
+public static class SampleNameList {
 
 	// Standalone Controls
 	public const string moveFB = "moveFB";

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b35a78f8e91bf6439c444289bb3057c, type: 3}
-  m_Name: StandaloneControlConfig
+  m_Name: SampleSCC
   m_EditorClassIdentifier: 
   controls:
   - identifier: moveFB
