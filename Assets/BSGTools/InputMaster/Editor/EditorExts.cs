@@ -1,14 +1,15 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
+﻿using UnityEditor;
+using UnityEngine;
 
-public static class EditorExts {
+namespace BSGTools.Editors {
+	public static class EditorExts {
 
-	public static void GUILayoutIndent(int indentLevel) {
-		GUILayout.Space(18f * indentLevel);
-	}
+		public static void GUILayoutIndent(int indentLevel) {
+			GUILayout.Space(18f * indentLevel);
+		}
 
-	public static void GUILayoutIndent() {
-		GUILayoutIndent(EditorGUI.indentLevel);
+		public static void GUILayoutIndent() {
+			GUILayoutIndent(EditorGUI.indentLevel);
+		}
 	}
 }

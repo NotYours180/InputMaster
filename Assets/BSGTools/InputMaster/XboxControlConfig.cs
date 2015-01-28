@@ -1,8 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System;
 using System.Linq;
+using UnityEngine;
 
 namespace BSGTools.IO.Xbox {
 	public class XboxControlConfig : ScriptableObject {

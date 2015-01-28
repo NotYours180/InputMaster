@@ -1,10 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
-using BSGTools.IO.Xbox;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System;
+using BSGTools.IO.Xbox;
+using UnityEditor;
+using UnityEngine;
 
 namespace BSGTools.Editors {
 	[CustomEditor(typeof(XboxControlConfig))]

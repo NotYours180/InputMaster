@@ -1,6 +1,6 @@
 ﻿#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
-using XInputDotNetPure;
+
 #endif
 
 using System;

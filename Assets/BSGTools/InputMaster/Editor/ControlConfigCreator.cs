@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
-using BSGTools.IO;
+﻿using BSGTools.IO;
 using BSGTools.IO.Xbox;
+using BSGTools.Shared;
+using UnityEditor;
+using UnityEngine;
 
 namespace BSGTools.Editors {
 	public class ControlConfigCreator : MonoBehaviour {

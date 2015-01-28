@@ -14,7 +14,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 using System;
-using System.Text;
 using UnityEngine;
 
 namespace BSGTools.IO {
@@ -102,6 +101,7 @@ namespace BSGTools.IO {
 		/// Keep in mind that if you block a control, it maintains its values from it's most recent update.
 		/// If you want to block and reset a control, you can use the <see cref="Reset(bool)"/> function.
 		/// </value>
+		[NonSerialized]
 		public bool blocked = false;
 
 		/// <value>

@@ -1,34 +1,31 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
+﻿using System;
+using BSGTools.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-namespace BSGTools.IO {
+namespace BSGTools.Events {
+	[AddComponentMenu("BSGTools/InputMaster/InputMaster Input Module")]
 	public class InputMasterInputModule : PointerInputModule {
 		private float m_NextAction;
-
-		private InputMode m_CurrentInputMode = InputMode.Mouse;
 
 		private Vector2 m_LastMousePosition;
 		private Vector2 m_MousePosition;
 
 		protected InputMasterInputModule() { }
 
-		public enum InputMode {
-			Mouse,
-			Buttons
-		}
+		GameObject lastHighlightedObj;
+		Selectable lastHighlightedSelectable;
+		public event Action<Selectable, Selectable> MouseHighlightChanged;
+		public event Action<GameObject, GameObject> MouseHighlightObjChanged;
 
-		public InputMode inputMode {
-			get { return m_CurrentInputMode; }
-		}
+		[SerializeField]
+		string m_Horizontal = "Horizontal",
+		m_Vertical = "Vertical",
+		m_Submit = "Submit",
+		m_Cancel = "Cancel";
 
-		public string horizontal, vertical, submit, cancel;
-
-		CombinedOutput coUIHorizontal, coUIVertical, coUISubmit, coUICancel;
-
-		public GameObject lastHighlighted { get; private set; }
-		public bool highlightChanged { get; private set; }
+		CombinedOutput coHorizontal, coVertical, coSubmit, coCancel;
 
 		[SerializeField]
 		private float m_InputActionsPerSecond = 10;
@@ -47,14 +44,20 @@ namespace BSGTools.IO {
 		}
 
 		public override void UpdateModule() {
-			var io = InputMaster.instance;
-			coUISubmit = io.GetCombinedOutput(submit);
-			coUIVertical = io.GetCombinedOutput(vertical);
-			coUIHorizontal = io.GetCombinedOutput(horizontal);
-			coUICancel = io.GetCombinedOutput(cancel);
-
 			m_LastMousePosition = m_MousePosition;
 			m_MousePosition = Input.mousePosition;
+
+			var co = InputMaster.instance.GetCombinedOutput(m_Horizontal);
+			coHorizontal = (co == null) ? CombinedOutput.none : co;
+
+			co = InputMaster.instance.GetCombinedOutput(m_Vertical);
+			coVertical = (co == null) ? CombinedOutput.none : co;
+
+			co = InputMaster.instance.GetCombinedOutput(m_Submit);
+			coSubmit = (co == null) ? CombinedOutput.none : co;
+
+			co = InputMaster.instance.GetCombinedOutput(m_Cancel);
+			coCancel = (co == null) ? CombinedOutput.none : co;
 		}
 
 		public override bool IsModuleSupported() {
@@ -68,10 +71,10 @@ namespace BSGTools.IO {
 			if(!base.ShouldActivateModule())
 				return false;
 
-			var shouldActivate = coUISubmit.fixedValue != 0;
-			shouldActivate |= coUICancel.fixedValue != 0;
-			shouldActivate |= !Mathf.Approximately(coUIHorizontal.value, 0.0f);
-			shouldActivate |= !Mathf.Approximately(coUIVertical.value, 0.0f);
+			var shouldActivate = coSubmit.anyDownPositive;
+			shouldActivate |= coCancel.anyDownPositive;
+			shouldActivate |= !Mathf.Approximately(coHorizontal.fixedValueF, 0.0f);
+			shouldActivate |= !Mathf.Approximately(coVertical.fixedValueF, 0.0f);
 			shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
 			shouldActivate |= Input.GetMouseButtonDown(0);
 			return shouldActivate;
@@ -88,7 +91,6 @@ namespace BSGTools.IO {
 			if(toSelect == null)
 				toSelect = eventSystem.firstSelectedGameObject;
 
-			eventSystem.SetSelectedGameObject(null, GetBaseEventData());
 			eventSystem.SetSelectedGameObject(toSelect, GetBaseEventData());
 		}
 
@@ -115,29 +117,42 @@ namespace BSGTools.IO {
 		/// Process submit keys.
 		/// </summary>
 		private bool SendSubmitEventToSelectedObject() {
-			if(eventSystem.currentSelectedGameObject == null || m_CurrentInputMode != InputMode.Buttons)
+			if(eventSystem.currentSelectedGameObject == null)
 				return false;
 
 			var data = GetBaseEventData();
-			if(coUISubmit.fixedValue != 0)
+			if(coSubmit.anyDownPositive)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.submitHandler);
 
-			if(coUICancel.fixedValue != 0)
+			if(coCancel.anyDownPositive)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.cancelHandler);
 			return data.used;
 		}
 
 		private bool AllowMoveEventProcessing(float time) {
-			bool allow = coUIHorizontal.fixedValue != 0;
-			allow |= coUIVertical.fixedValue != 0;
+			bool allow = coHorizontal.anyDownPositive;
+			allow |= coVertical.anyDownPositive;
 			allow |= (time > m_NextAction);
 			return allow;
 		}
 
 		private Vector2 GetRawMoveVector() {
 			Vector2 move = Vector2.zero;
-			move.x = coUIHorizontal.fixedValueF;
-			move.y = coUIVertical.fixedValueF;
+			move.x = coHorizontal.fixedValueF;
+			move.y = coVertical.fixedValueF;
+
+			if(coHorizontal.anyDownPositive) {
+				if(move.x < 0)
+					move.x = -1f;
+				if(move.x > 0)
+					move.x = 1f;
+			}
+			if(coVertical.anyDownPositive) {
+				if(move.y < 0)
+					move.y = -1f;
+				if(move.y > 0)
+					move.y = 1f;
+			}
 			return move;
 		}
 
@@ -155,45 +170,10 @@ namespace BSGTools.IO {
 			var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
 			if(!Mathf.Approximately(axisEventData.moveVector.x, 0f)
 				|| !Mathf.Approximately(axisEventData.moveVector.y, 0f)) {
-				if(m_CurrentInputMode != InputMode.Buttons) {
-					// so if we are chaning to keyboard
-					m_CurrentInputMode = InputMode.Buttons;
-
-					// if we are doing a 'fresh selection'
-					// return as we don't want to do a move.
-					if(ResetSelection()) {
-						m_NextAction = time + 1f / m_InputActionsPerSecond;
-						return true;
-					}
-				}
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
 			}
 			m_NextAction = time + 1f / m_InputActionsPerSecond;
 			return axisEventData.used;
-		}
-
-		private bool ResetSelection() {
-			var baseEventData = GetBaseEventData();
-			// clear all selection
-			// & figure out what the mouse is over
-			var lastMousePointer = GetLastPointerEventData(kMouseLeftId);
-			var hoveredObject = lastMousePointer == null ? null : lastMousePointer.pointerEnter;
-			HandlePointerExitAndEnter(lastMousePointer, null);
-			eventSystem.SetSelectedGameObject(null, baseEventData);
-
-			// if we were hovering something...
-			// use this as the basis for the selection
-			bool resetSelection = false;
-			GameObject toSelect = ExecuteEvents.GetEventHandler<ISelectHandler>(hoveredObject);
-			if(toSelect == null) {
-				// if there was no hover
-				// then use the last selected
-				toSelect = eventSystem.lastSelectedGameObject;
-				resetSelection = true;
-			}
-
-			eventSystem.SetSelectedGameObject(toSelect, baseEventData);
-			return resetSelection;
 		}
 
 		/// <summary>
@@ -227,17 +207,11 @@ namespace BSGTools.IO {
 			}
 		}
 
-		private bool UseMouse(bool pressed, bool released, PointerEventData pointerData) {
-			if(m_CurrentInputMode == InputMode.Mouse)
+		private static bool UseMouse(bool pressed, bool released, PointerEventData pointerData) {
+			if(pressed || released || pointerData.IsPointerMoving() || pointerData.IsScrolling())
 				return true;
 
-			// On mouse action switch back to mouse control scheme
-			if(pressed || released) {
-				m_CurrentInputMode = InputMode.Mouse;
-				eventSystem.SetSelectedGameObject(null);
-			}
-
-			return m_CurrentInputMode == InputMode.Mouse;
+			return false;
 		}
 
 		private bool SendUpdateEventToSelectedObject() {
@@ -255,8 +229,15 @@ namespace BSGTools.IO {
 		private void ProcessMousePress(MouseButtonEventData data) {
 			var pointerEvent = data.buttonData;
 			var currentOverGo = pointerEvent.pointerCurrentRaycast.gameObject;
-			highlightChanged = currentOverGo != lastHighlighted;
-			lastHighlighted = currentOverGo;
+			var currentOverSelectable = (currentOverGo != null) ? currentOverGo.GetComponent<Selectable>() : null;
+
+			if(lastHighlightedObj != currentOverGo && MouseHighlightObjChanged != null)
+				MouseHighlightObjChanged(lastHighlightedObj, currentOverGo);
+			if(currentOverSelectable != lastHighlightedSelectable && MouseHighlightChanged != null)
+				MouseHighlightChanged(lastHighlightedSelectable, currentOverSelectable);
+
+			lastHighlightedObj = currentOverGo;
+			lastHighlightedSelectable = currentOverSelectable;
 
 			// PointerDown notification
 			if(data.PressedThisFrame()) {
@@ -328,11 +309,11 @@ namespace BSGTools.IO {
 				pointerEvent.eligibleForClick = false;
 				pointerEvent.pointerPress = null;
 				pointerEvent.rawPointerPress = null;
-				pointerEvent.dragging = false;
 
-				if(pointerEvent.pointerDrag != null)
+				if(pointerEvent.pointerDrag != null && pointerEvent.dragging)
 					ExecuteEvents.Execute(pointerEvent.pointerDrag, pointerEvent, ExecuteEvents.endDragHandler);
 
+				pointerEvent.dragging = false;
 				pointerEvent.pointerDrag = null;
 
 				// redo pointer enter / exit to refresh state

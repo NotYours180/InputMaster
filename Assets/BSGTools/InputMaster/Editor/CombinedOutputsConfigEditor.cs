@@ -1,11 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
-using BSGTools.IO;
-using System.Collections.Generic;
-using System;
+﻿using System.Collections.Generic;
 using System.Linq;
+using BSGTools.IO;
 using BSGTools.IO.Xbox;
+using UnityEditor;
+using UnityEngine;
 
 namespace BSGTools.Editors {
 	[CustomEditor(typeof(CombinedOutputsConfig))]

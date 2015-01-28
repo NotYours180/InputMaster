@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BSGTools.IO.Xbox;
+using UnityEngine;
 
 namespace BSGTools.IO {
 	public class CombinedOutputsConfig : ScriptableObject {

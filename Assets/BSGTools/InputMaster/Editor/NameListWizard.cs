@@ -1,16 +1,12 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
-using System.Collections.Generic;
-using UnityEditorInternal;
-using System;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.CodeDom.Compiler;
-using Microsoft.CSharp;
-using BSGTools.IO.Xbox;
-using BSGTools.IO;
 using System.Linq;
+using System.Text;
+using BSGTools.IO;
+using BSGTools.IO.Xbox;
+using Microsoft.CSharp;
+using UnityEditor;
+using UnityEngine;
 
 namespace BSGTools.Editors {
 	public class NameListWizard : ScriptableWizard {

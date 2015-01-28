@@ -18,13 +18,10 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #endif
 #if XBOX_ALLOWED
 #define NEW_UI
-using UnityEngine.EventSystems;
+
 #endif
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using BSGTools.IO.Xbox;
 using UnityEngine;
 
@@ -35,7 +32,7 @@ namespace BSGTools.IO {
 	/// Updates and maintains all Control states.
 	/// </summary>
 	[DisallowMultipleComponent]
-	[AddComponentMenu("BSGTools/InputMaster/New InputMaster")]
+	[AddComponentMenu("BSGTools/InputMaster/InputMaster")]
 	public class InputMaster : MonoBehaviour {
 		#region Fields
 		[Header("Base Configurations")]
@@ -57,6 +54,8 @@ namespace BSGTools.IO {
 		/// Are any controls in an active Up state?
 		/// </value>
 		public bool anyControlUp { get; private set; }
+
+		public bool mouseMovementBlocked = false;
 
 
 		/// <value>
@@ -137,37 +136,50 @@ namespace BSGTools.IO {
 			});
 		}
 
-#if XBOX_ALLOWED
+
 		private void OnApplicationFocus(bool focused) {
+#if XBOX_ALLOWED
 			if(XboxUtils.StopVibrateOnAppFocusLost && focused == false)
 				XboxUtils.SetVibrationAll(0f);
+#endif
 		}
 
 		private void OnApplicationPause(bool paused) {
+#if XBOX_ALLOWED
 			if(XboxUtils.StopVibrateOnAppPause && paused == true)
 				XboxUtils.SetVibrationAll(0f);
+#endif
 		}
 
 		private void OnApplicationQuit() {
+#if XBOX_ALLOWED
 			XboxUtils.SetVibrationAll(0f);
-		}
 #endif
+			SetBlockAll(false);
+		}
+
 
 		void Update() {
 #if XBOX_ALLOWED
 			XboxUtils.UpdateStates();
 #endif
-			if(!string.IsNullOrEmpty(mouseXAxisName)) {
-				mouseX = Input.GetAxis(mouseXAxisName);
-				mouseXRaw = Input.GetAxisRaw(mouseXAxisName);
+			if(mouseMovementBlocked) {
+				mouseX = 0f;
+				mouseY = 0f;
 			}
-			if(!string.IsNullOrEmpty(mouseYAxisName)) {
-				mouseY = Input.GetAxis(mouseYAxisName);
-				mouseYRaw = Input.GetAxisRaw(mouseYAxisName);
-			}
-			if(!string.IsNullOrEmpty(mouseWheelAxisName)) {
-				mouseWheel = Input.GetAxis(mouseWheelAxisName);
-				mouseWheelRaw = Input.GetAxisRaw(mouseWheelAxisName);
+			else {
+				if(!string.IsNullOrEmpty(mouseXAxisName)) {
+					mouseX = Input.GetAxis(mouseXAxisName);
+					mouseXRaw = Input.GetAxisRaw(mouseXAxisName);
+				}
+				if(!string.IsNullOrEmpty(mouseYAxisName)) {
+					mouseY = Input.GetAxis(mouseYAxisName);
+					mouseYRaw = Input.GetAxisRaw(mouseYAxisName);
+				}
+				if(!string.IsNullOrEmpty(mouseWheelAxisName)) {
+					mouseWheel = Input.GetAxis(mouseWheelAxisName);
+					mouseWheelRaw = Input.GetAxisRaw(mouseWheelAxisName);
+				}
 			}
 
 			anyControlDown = false;

@@ -14,11 +14,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 using System;
-using System.Text;
-using BSGTools.IO.Xbox;
-using UnityEngine;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using BSGTools.IO.Xbox;
 
 namespace BSGTools.IO {
 
@@ -30,6 +28,8 @@ namespace BSGTools.IO {
 		public delegate float OnAddPost();
 		public event OnAddPost AddPostClamped;
 		public event OnAddPost AddPost;
+
+		public static readonly CombinedOutput none = new CombinedOutput();
 
 		/// <value>
 		/// The clamped, combined FixedValue as a float.
@@ -169,6 +169,6 @@ namespace BSGTools.IO {
 				var io = InputMaster.instance;
 				return identifiers.Select(s => io.GetControl(s));
 			}
-		} 
+		}
 	}
 }
