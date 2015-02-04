@@ -17,18 +17,16 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define XBOX_ALLOWED
 #endif
 using System;
-using BSGTools.IO.XInput;
-using UnityEngine;
-using XInputDotNetPure;
 using System.Linq;
-using System.Collections.Generic;
+using BSGTools.IO.XInput;
+using XInputDotNetPure;
 
 
 namespace BSGTools.IO {
 	public enum Scope {
 		All,
-		Release,
-		Editor
+		ReleaseOnly,
+		EditorOnly
 	}
 
 	[Serializable]
@@ -56,7 +54,21 @@ namespace BSGTools.IO {
 
 		protected GamePadState gpState { get; private set; }
 
-		internal Control() { }
+		internal Control() {
+			Reset();
+		}
+
+		public Control(string identifier)
+			: this(identifier, Scope.All, 0) { }
+		public Control(string identifier, Scope scope)
+			: this(identifier, scope, 0) { }
+		public Control(string identifier, byte controllerIndex)
+			: this(identifier, Scope.All, controllerIndex) { }
+		public Control(string identifier, Scope scope, byte controllerIndex) {
+			this.identifier = identifier;
+			this.scope = scope;
+			this.controllerIndex = controllerIndex;
+		}
 
 		/// <summary>
 		/// Reset all non-configuration values and states for this control.
@@ -74,6 +86,7 @@ namespace BSGTools.IO {
 		///	<seealso cref="blocked"/>
 		public void Reset(bool block) {
 			blocked = block;
+			ResetControl();
 		}
 
 		protected abstract void ResetControl();
@@ -99,34 +112,6 @@ namespace BSGTools.IO {
 			return new YAMLView(this);
 		}
 
-		public static Control FromYAMLView(YAMLView view) {
-			Control c;
-			if(view.controlType == 0)
-				c = ACFromYAMLView(view);
-			else if(view.controlType == 1)
-				c = AXFromYAMLView(view);
-			else
-				throw new InvalidCastException();
-			c.identifier = view.action;
-			c.controllerIndex = view.controllerIndex;
-			c.scope = view.scope;
-			return c;
-		}
-
-		private static AxisControl AXFromYAMLView(YAMLView view) {
-			var control = new AxisControl();
-			for(int i = 0;i < view.bindings.Length;i++)
-				control.bindings.Add(view.bindings[0], view.multipliers[0]);
-			return control;
-		}
-
-		private static ActionControl ACFromYAMLView(YAMLView view) {
-			var control = new ActionControl();
-			for(int i = 0;i < view.bindings.Length;i++)
-				control.bindings.Add(view.bindings[0], view.modifiers[0]);
-			return control;
-		}
-
 		/// <summary>
 		/// Internally used for updating the Up/Held/Down states of a control.
 		/// </summary>
@@ -142,30 +127,21 @@ namespace BSGTools.IO {
 	}
 
 	public class YAMLView {
-		public string action { get; set; }
-		public byte controlType { get; set; }
-		public Scope scope { get; set; }
-		public byte controllerIndex { get; set; }
+		public string identifier { get; set; }
 		public Binding[] bindings { get; set; }
 		public ModifierFlags[] modifiers { get; set; }
-		public float[] multipliers { get; set; }
 
 		public YAMLView(Control c) {
-			this.action = c.identifier;
-			this.scope = c.scope;
-			this.controllerIndex = c.controllerIndex;
+			this.identifier = c.identifier;
 
 			if(c is ActionControl) {
-				this.controlType = 0;
 				var ac = c as ActionControl;
 				this.bindings = ac.bindings.Select(b => b.Key).ToArray();
 				this.modifiers = ac.bindings.Values.ToArray();
 			}
 			else if(c is AxisControl) {
-				this.controlType = 1;
 				var ax = c as AxisControl;
 				this.bindings = ax.bindings.Select(b => b.Key).ToArray();
-				this.multipliers = ax.bindings.Values.ToArray();
 			}
 		}
 

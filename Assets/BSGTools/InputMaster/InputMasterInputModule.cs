@@ -47,6 +47,11 @@ namespace BSGTools.Events {
 		public override void UpdateModule() {
 			m_LastMousePosition = m_MousePosition;
 			m_MousePosition = Input.mousePosition;
+
+			horizontal = InputMaster.GetAxis(m_Horizontal);
+			vertical = InputMaster.GetAxis(m_Vertical);
+			submit = InputMaster.GetAction(m_Submit);
+			cancel = InputMaster.GetAction(m_Cancel);
 		}
 
 		public override bool IsModuleSupported() {

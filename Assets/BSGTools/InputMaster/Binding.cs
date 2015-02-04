@@ -487,7 +487,7 @@ namespace BSGTools.IO {
 
 		public static bool GetKCValue(Binding code) {
 			var kc = (KeyCode)Enum.Parse(typeof(KeyCode), code.ToString());
-			return Input.GetKeyDown(kc);
+			return Input.GetKey(kc);
 		}
 	}
 }

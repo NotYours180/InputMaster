@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-using XInputDotNetPure;
 
 namespace BSGTools.IO {
 
@@ -36,20 +34,24 @@ namespace BSGTools.IO {
 		public State state { get; private set; }
 		State previousState;
 
-		internal ActionControl() { }
+		internal ActionControl()
+			: base() { }
+		public ActionControl(string identifier)
+			: base(identifier) { }
+		public ActionControl(string identifier, Scope scope)
+			: base(identifier, scope) { }
+		public ActionControl(string identifier, byte controllerIndex)
+			: this(identifier, Scope.All, controllerIndex) { }
+		public ActionControl(string identifier, Scope scope, byte controllerIndex)
+			: base(identifier, scope, controllerIndex) { }
 
-		/// <summary>
-		/// Creates a new KeyControl with a negative binding.
-		/// This is the "new version" of AxisControl from previous versions of InputMaster.
-		/// </summary>
-		/// <param name="positive"><see cref="positive"/></param>
-		/// <param name="negative"><see cref="negative"/></param>
-		public ActionControl(Binding[] bindings, ModifierFlags[] modifiers) {
-			if(bindings.Length != modifiers.Length)
-				throw new ArgumentException("Bindings length must == modifiers length");
-			for(int i = 0;i < bindings.Length;i++)
-				this.bindings.Add(bindings[i], modifiers[0]);
-			ResetControl();
+		public ActionControl AddBinding(Binding b) {
+			return AddBinding(b, ModifierFlags.None);
+		}
+
+		public ActionControl AddBinding(Binding b, ModifierFlags flags) {
+			bindings.Add(b, flags);
+			return this;
 		}
 
 		/// <summary>
@@ -86,7 +88,7 @@ namespace BSGTools.IO {
 		}
 
 		protected override void ResetControl() {
-			previousState = state = State.Up;
+			state = State.None;
 		}
 	}
 }

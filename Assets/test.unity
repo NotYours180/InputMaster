@@ -167,7 +167,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 66779804}
-  - 114: {fileID: 66779803}
+  - 114: {fileID: 66779805}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -175,21 +175,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &66779803
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 66779802}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16fa42d930de0c447a690ea34d5db8b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mouseMovementBlocked: 0
-  mouseXAxisName: 
-  mouseYAxisName: 
-  mouseWheelAxisName: 
 --- !u!4 &66779804
 Transform:
   m_ObjectHideFlags: 0
@@ -202,6 +187,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!114 &66779805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 66779802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bd42c5bcc51a364aaa3319dd9e5bbda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &215628694
 GameObject:
   m_ObjectHideFlags: 0

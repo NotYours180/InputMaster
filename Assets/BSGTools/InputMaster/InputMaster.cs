@@ -20,7 +20,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define NEW_UI
 #endif
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,119 +28,90 @@ using UnityEngine;
 using YamlDotNet.Serialization;
 
 namespace BSGTools.IO {
+	public static class InputMaster {
 
-	/// <summary>
-	/// A single instance of this exists in the application.
-	/// Updates and maintains all Control states.
-	/// </summary>
-	[DisallowMultipleComponent]
-	[AddComponentMenu("BSGTools/InputMaster/InputMaster")]
-	public class InputMaster : MonoBehaviour {
 		#region Fields
-		public static InputMaster instance { get; private set; }
-
-		List<Control> controls = new List<Control>();
+		public static List<Control> controls = new List<Control>();
 
 		/// <value>
 		/// Are any controls in an active Down state?
 		/// </value>
-		public bool anyControlDown { get; private set; }
+		public static bool anyControlDown { get; internal set; }
 		/// <value>
 		/// Are any controls in an active Held state?
 		/// </value>
-		public bool anyControlHeld { get; private set; }
+		public static bool anyControlHeld { get; internal set; }
 		/// <value>
 		/// Are any controls in an active Up state?
 		/// </value>
-		public bool anyControlUp { get; private set; }
+		public static bool anyControlUp { get; internal set; }
 
-		public bool mouseMovementBlocked = false;
+		public static bool mouseMovementBlocked = false;
 
 
 		/// <value>
 		/// The Mouse X Axis axis name in Unity's Input Manager
 		/// </value>
-		[SerializeField, Header("Mouse Axes")]
-		string mouseXAxisName;
+		public static string mouseXAxisName;
 		/// <value>
 		/// The Mouse X Axis axis value from Unity's native Input system.
 		/// </value>
-		public float mouseX { get; private set; }
+		public static float mouseX { get; internal set; }
 		/// <value>
 		/// The Mouse X Axis raw axis value from Unity's native Input system.
 		/// </value>
-		public float mouseXRaw { get; private set; }
+		public static float mouseXRaw { get; internal set; }
 
 		/// <value>
 		/// The Mouse Y Axis axis name in Unity's Input Manager
 		/// </value>
-		[SerializeField]
-		string mouseYAxisName;
+		public static string mouseYAxisName;
 		/// <value>
 		/// The Mouse Y Axis axis value from Unity's native Input system.
 		/// </value>
-		public float mouseY { get; private set; }
+		public static float mouseY { get; internal set; }
 		/// <value>
 		/// The Mouse Y Axis raw axis value from Unity's native Input system.
 		/// </value>
-		public float mouseYRaw { get; private set; }
+		public static float mouseYRaw { get; internal set; }
 
 		/// <value>
 		/// The MouseWheel Axis axis name in Unity's Input Manager
 		/// </value>
-		[SerializeField]
-		string mouseWheelAxisName;
+		public static string mouseWheelAxisName;
 		/// <value>
 		/// The MouseWheel Axis axis value from Unity's native Input system.
 		/// </value>
-		public float mouseWheel { get; private set; }
+		public static float mouseWheel { get; internal set; }
 		/// <value>
 		/// The MouseWheel Axis raw axis value from Unity's native Input system.
 		/// </value>
-		public float mouseWheelRaw { get; private set; }
+		public static float mouseWheelRaw { get; internal set; }
 		#endregion
 
-		bool initialized = false;
+		static bool initialized;
 
-		void Start() {
-			InputMaster.instance = this;
-			Initialize(Application.dataPath + "/config2.cfg");
-		}
-
-		public void Initialize(string cfgPath) {
-			//ReadControls(cfgPath);
-			controls.Add(new ActionControl(
-				new Binding[] { 
-					Binding.A 
-				},
-				new ModifierFlags[] { 
-					ModifierFlags.None 
-				})
-			);
-			controls.Add(new AxisControl(
-				new Binding[] { 
-					Binding.A 
-				},
-				new float[]{ 
-					1f
-				})
-			);
-
-			WriteControls(cfgPath);
+		public static void Initialize() {
+			if(initialized)
+				return;
+			var go = new GameObject("INPUT_MASTER");
+			var updater = go.AddComponent<InputMasterUpdater>();
+			Object.DontDestroyOnLoad(updater);
 			initialized = true;
 		}
 
-		public void ReadControls(string cfgPath) {
+		public static YAMLView[] ReadControls(string cfgPath) {
+			YAMLView[] views = null;
 			var d = new Deserializer();
 			using(var reader = new StreamReader(cfgPath)) {
-				var value = d.Deserialize<YAMLView[]>(reader);
-				controls = value.Select(y => Control.FromYAMLView(y)).ToList();
+				views = d.Deserialize<YAMLView[]>(reader);
 			}
+			return views;
 		}
 
-		public void WriteControls(string cfgPath) {
+		public static void WriteControls(string cfgPath) {
 			var s = new Serializer();
-			var graph = controls.Select(c => c.GetYAMLView()).ToArray();
+			var graph = controls.Where(c => c.scope != Scope.EditorOnly).Select(c => c.GetYAMLView()).ToArray();
 			using(var writer = new StreamWriter(cfgPath)) {
 				writer.AutoFlush = true;
 				s.Serialize(writer, graph);
@@ -152,9 +122,9 @@ namespace BSGTools.IO {
 		/// Resets all states/values on all controls.
 		/// </summary>
 		/// <seealso cref="ResetAll(bool)"/>
-		public void ResetAll() {
-			//foreach(var c in controlConfig.controls)
-			//	c.Reset();
+		public static void ResetAll() {
+			foreach(var c in controls)
+				c.Reset();
 		}
 
 		/// <summary>
@@ -163,118 +133,34 @@ namespace BSGTools.IO {
 		/// </summary>
 		/// <param name="blocked">To block/unblock.</param>
 		/// <seealso cref="Control.blocked"/>
-		public void SetBlockAll(bool blocked) {
-			//foreach(var c in controlConfig.controls)
-			//	c.blocked = blocked;
+		public static void SetBlockAll(bool blocked) {
+			foreach(var c in controls)
+				c.blocked = blocked;
 		}
 
-
-		private void OnApplicationFocus(bool focused) {
-#if XBOX_ALLOWED
-			if(XInputUtils.StopVibrateOnAppFocusLost && focused == false)
-				XInputUtils.SetVibrationAll(0f);
-#endif
-		}
-
-		private void OnApplicationPause(bool paused) {
-#if XBOX_ALLOWED
-			if(XInputUtils.StopVibrateOnAppPause && paused == true)
-				XInputUtils.SetVibrationAll(0f);
-#endif
-		}
-
-		private void OnApplicationQuit() {
-#if XBOX_ALLOWED
-			XInputUtils.SetVibrationAll(0f);
-#endif
-			SetBlockAll(false);
-		}
-
-
-		void Update() {
-			if(!initialized) {
-				Debug.LogError("Must call <color=blue>Initialize()</color> before updates can begin!");
-				return;
-			}
-
-#if XBOX_ALLOWED
-			XInputUtils.UpdateStates();
-#endif
-			if(mouseMovementBlocked) {
-				mouseX = 0f;
-				mouseY = 0f;
-			}
-			else {
-				if(!string.IsNullOrEmpty(mouseXAxisName)) {
-					mouseX = Input.GetAxis(mouseXAxisName);
-					mouseXRaw = Input.GetAxisRaw(mouseXAxisName);
-				}
-				if(!string.IsNullOrEmpty(mouseYAxisName)) {
-					mouseY = Input.GetAxis(mouseYAxisName);
-					mouseYRaw = Input.GetAxisRaw(mouseYAxisName);
-				}
-				if(!string.IsNullOrEmpty(mouseWheelAxisName)) {
-					mouseWheel = Input.GetAxis(mouseWheelAxisName);
-					mouseWheelRaw = Input.GetAxisRaw(mouseWheelAxisName);
-				}
-			}
-
-			anyControlDown = false;
-			anyControlHeld = false;
-			anyControlUp = false;
-
-			if(controls != null)
-				foreach(var c in controls)
-					UpdateControl(c);
-		}
-
-		private void UpdateControl(Control c) {
-			if(CheckScope(c)) {
-				c.Update();
-
-				//if((c.down & ControlState.Either) != 0)
-				//	anyControlDown = true;
-				//if((c.held & ControlState.Either) != 0)
-				//	anyControlHeld = true;
-				//if((c.up & ControlState.Either) != 0)
-				//	anyControlUp = true;
-			}
-		}
-
-		private static bool CheckScope(Control c) {
-			switch(c.scope) {
-				case Scope.Release:
-					return Application.isEditor == false;
-				case Scope.Editor:
-					return Application.isEditor;
-				default:
-					return true;
-			}
-		}
-
-		public T GetControl<T>(string identifier) where T : Control {
+		public static T GetControl<T>(string identifier) where T : Control {
 			return controls.OfType<T>().FirstOrDefault(c => c.identifier == identifier);
 		}
 
-		public bool TryGetControl<T>(string identifier, out T control) where T : Control {
+		public static bool TryGetControl<T>(string identifier, out T control) where T : Control {
 			control = GetControl<T>(identifier);
 			return control != null;
 		}
 
-		public ActionControl GetAction(string identifier) {
+		public static ActionControl GetAction(string identifier) {
 			return controls.OfType<ActionControl>().FirstOrDefault(c => c.identifier == identifier);
 		}
 
-		public bool TryGetAction(string identifier, out ActionControl control) {
+		public static bool TryGetAction(string identifier, out ActionControl control) {
 			control = GetAction(identifier);
 			return control != null;
 		}
 
-		public AxisControl GetAxis(string identifier) {
+		public static AxisControl GetAxis(string identifier) {
 			return controls.OfType<AxisControl>().FirstOrDefault(c => c.identifier == identifier);
 		}
 
-		public bool TryGetAxis(string identifier, out AxisControl control) {
+		public static bool TryGetAxis(string identifier, out AxisControl control) {
 			control = GetAxis(identifier);
 			return control != null;
 		}

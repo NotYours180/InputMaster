@@ -4,11 +4,7 @@
 
 using System;
 using System.Collections.Generic;
-using BSGTools.IO;
-using BSGTools.IO.XInput;
 using UnityEngine;
-using XInputDotNetPure;
-using System.Linq;
 
 namespace BSGTools.IO {
 	/// <summary>
@@ -29,19 +25,20 @@ namespace BSGTools.IO {
 		public float value { get; protected set; }
 
 
-		internal AxisControl() { }
+		internal AxisControl()
+			: base() { }
+		public AxisControl(string identifier)
+			: base(identifier) { }
+		public AxisControl(string identifier, Scope scope)
+			: base(identifier, scope) { }
+		public AxisControl(string identifier, byte controllerIndex)
+			: this(identifier, Scope.All, controllerIndex) { }
+		public AxisControl(string identifier, Scope scope, byte controllerIndex)
+			: base(identifier, scope, controllerIndex) { }
 
-		/// <summary>
-		/// Creates a new KeyControl with a negative binding.
-		/// This is the "new version" of AxisControl from previous versions of InputMaster.
-		/// </summary>
-		/// <param name="positive"><see cref="positive"/></param>
-		/// <param name="negative"><see cref="negative"/></param>
-		public AxisControl(Binding[] bindings, float[] multipliers) {
-			if(bindings.Length != multipliers.Length)
-				throw new ArgumentException("Bindings length must == multipliers length");
-			for(int i = 0;i < bindings.Length;i++)
-				this.bindings.Add(bindings[i], multipliers[i]);
+		public AxisControl AddBinding(Binding b, float multiplier) {
+			bindings.Add(b, multiplier);
+			return this;
 		}
 
 		/// <summary>
@@ -60,7 +57,7 @@ namespace BSGTools.IO {
 		}
 
 		protected override void ResetControl() {
-			rValue = 0f;
+			value = rValue = 0f;
 		}
 	}
 }
