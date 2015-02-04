@@ -13,88 +13,30 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
+#define XBOX_ALLOWED
+#endif
 using System;
+using BSGTools.IO.XInput;
 using UnityEngine;
+using XInputDotNetPure;
+using System.Linq;
+using System.Collections.Generic;
+
 
 namespace BSGTools.IO {
-
-	/// <summary>
-	/// Describes the current state of a control's specific state.
-	/// Use (control.Down/Held/Up & flag) != 0 for Positive & Negative.
-	/// Use == for Neither, Both, and Either.
-	/// </summary>
-	[Flags]
-	public enum ControlState {
-		Neither = Positive & Negative,
-		Positive = 1 << 0,
-		Negative = 1 << 1,
-		Both = Positive | Negative,
-		Either = Positive ^ Negative
+	public enum Scope {
+		All,
+		Release,
+		Editor
 	}
 
-	/// <summary>
-	/// Provided to give a common base class and common functionality for <see cref="StandaloneControl"/> and <see cref="XboxControl"/>.
-	/// <para />
-	/// Controls should be instantiated as parameters in a custom MonoBehaviour using block initialization. See example below.
-	/// <para />
-	/// </summary>
-	/// <strong>Declaration Example</strong>
-	/// <code>
-	///	<pre>
-	///		KeyControl use = new KeyControl(KeyCode.E) {
-	///			Name = "Jump",
-	///			Gravity = 2f,
-	///			Sensitivity = 2f
-	///		});
-	/// </pre>
-	/// </code>
 	[Serializable]
 	public abstract class Control {
 		/// <value>
 		/// A required, unique identifiers.
 		/// </value>
 		public string identifier = "new_" + Guid.NewGuid().ToString().ToUpper().Split('-')[0];
-
-		/// <value>
-		/// The current "down" state of the control.
-		/// </value>
-		public ControlState down { get; protected set; }
-
-		/// <value>
-		/// The current "held" state of the control.
-		/// </value>
-		public ControlState held { get; protected set; }
-
-		/// <value>
-		/// The current "up" state of the control.
-		/// </value>
-		public ControlState up { get; protected set; }
-
-		/// <value>
-		/// Functionally identical to the Dead property of Unity's native Input system.
-		/// The absolute value of a control's real value reports as 0 if it's less than this value.
-		/// </value>
-		public float dead = 0f;
-
-		/// <value>
-		/// Functionally identical to the Gravity property of Unity's native Input system.
-		/// Speed per second that a control at rest returns to 0.
-		/// </value>
-		public float gravity = 1f;
-
-		/// <value>
-		/// Functionally identical to the Sensitivity property of Unity's native Input system.
-		/// Speed per second that a control in motion approaches 1.
-		/// </value>
-		public float sensitivity = 1f;
-
-		/// <value>
-		/// Functionally identical to the Invert property of Unity's native Input system.
-		/// If true, the contol's value will report as -(value).
-		/// However, the state of the control will remain the same (positive down will still report as positive down, etc).
-		/// Keep in mind that this functions whether or not a negative binding is supplied.
-		/// </value>
-		public bool invert = false;
 
 		/// <value>
 		/// This is used to block any control from receiving updates.
@@ -108,52 +50,20 @@ namespace BSGTools.IO {
 		/// Used to specify controls that automatically
 		/// only work in the Editor or in Debug builds.
 		/// </value>
-		public bool debugOnly = false;
+		public Scope scope = Scope.All;
 
+		public byte controllerIndex = 0;
 
-		/// <value>
-		/// Functionally identical to the Snap property of Unity's native Input system.
-		/// If true, and if the control has a positive and negative binding, the control's value will snap to 0 if provided an opposite input.
-		/// </value>
-		public bool snap = false;
+		protected GamePadState gpState { get; private set; }
 
-		/// <value>
-		/// Returns an analog representation of the current real value.
-		/// This is functionally identical to calling Input.GetAxis() from Unity's native Input system.
-		/// </value>
-		public float value { get; protected set; }
-
-		/// <value>
-		/// Returns a digital, ceiling-rounded representation of <see cref="value"/>.
-		/// This is functionally identical to calling Input.GetAxisRaw() from Unity's native Input system.
-		/// </value>
-		public sbyte fixedValue { get; protected set; }
-
-
-		/// <value>
-		/// An internally used property that keeps track of the "real value" across updates.
-		/// This is necessary so that properties like <see cref="dead"/> can be applied to the final value.
-		/// Think of this as the "real value" and the <see cref="value"/> property as this value after post processing.
-		/// This value is not necessary to use for input.
-		/// </value>
-		protected float realValue { get; set; }
-
-		protected Control() {
-			if(string.IsNullOrEmpty(identifier.Trim()))
-				throw new UnityException("Identifier must not be null or empty!");
-		}
+		internal Control() { }
 
 		/// <summary>
 		/// Reset all non-configuration values and states for this control.
 		/// </summary>
 		/// <seealso cref="Reset(bool)"/>
 		public void Reset() {
-			down = ControlState.Neither;
-			up = ControlState.Neither;
-			held = ControlState.Neither;
-			fixedValue = 0;
-			value = 0f;
-			realValue = 0f;
+			Reset(false);
 		}
 
 		/// <summary>
@@ -163,9 +73,10 @@ namespace BSGTools.IO {
 		/// <seealso cref="Reset"/>
 		///	<seealso cref="blocked"/>
 		public void Reset(bool block) {
-			Reset();
 			blocked = block;
 		}
+
+		protected abstract void ResetControl();
 
 		/// <summary>
 		/// Updates the control.
@@ -173,63 +84,53 @@ namespace BSGTools.IO {
 		/// This is public specifically for the use of <see cref="InputMaster"/>.
 		/// </summary>
 		public void Update() {
-			SoftReset();
-			if(blocked == false)
-				UpdateStates();
+			Reset();
+			if(blocked)
+				return;
+
+#if XBOX_ALLOWED
+			gpState = XInputUtils.ControllerStates[controllerIndex];
+#endif
 			UpdateValues();
+
 		}
 
-		/// <summary>
-		/// Internally used for maintaining the <see cref="realValue"/> inbetween updates while resetting everything else.
-		/// </summary>
-		void SoftReset() {
-			var realVal = realValue;
-			Reset();
-			realValue = realVal;
+		public YAMLView GetYAMLView() {
+			return new YAMLView(this);
+		}
+
+		public static Control FromYAMLView(YAMLView view) {
+			Control c;
+			if(view.controlType == 0)
+				c = ACFromYAMLView(view);
+			else if(view.controlType == 1)
+				c = AXFromYAMLView(view);
+			else
+				throw new InvalidCastException();
+			c.identifier = view.action;
+			c.controllerIndex = view.controllerIndex;
+			c.scope = view.scope;
+			return c;
+		}
+
+		private static AxisControl AXFromYAMLView(YAMLView view) {
+			var control = new AxisControl();
+			for(int i = 0;i < view.bindings.Length;i++)
+				control.bindings.Add(view.bindings[0], view.multipliers[0]);
+			return control;
+		}
+
+		private static ActionControl ACFromYAMLView(YAMLView view) {
+			var control = new ActionControl();
+			for(int i = 0;i < view.bindings.Length;i++)
+				control.bindings.Add(view.bindings[0], view.modifiers[0]);
+			return control;
 		}
 
 		/// <summary>
 		/// Internally used for updating the Up/Held/Down states of a control.
 		/// </summary>
-		protected abstract void UpdateStates();
-
-		/// <summary>
-		/// Internally used for updating a control's values using it's current states.
-		/// </summary>
-		protected virtual void UpdateValues() {
-			if((held & ControlState.Positive) != 0)
-				realValue += Time.deltaTime * sensitivity;
-			else if(realValue > 0f) {
-				realValue -= Time.deltaTime * sensitivity;
-				if(realValue < 0f)
-					realValue = 0f;
-			}
-			if((held & ControlState.Negative) != 0)
-				realValue -= Time.deltaTime * sensitivity;
-			else if(realValue < 0f) {
-				realValue += Time.deltaTime * sensitivity;
-				if(realValue > 0f)
-					realValue = 0f;
-			}
-
-			realValue = Mathf.Clamp(realValue, -1f, 1f);
-
-			if(held != ControlState.Both && snap) {
-				if(realValue > 0f && (held & ControlState.Negative) != 0)
-					realValue = 0f;
-				else if(realValue < 0f && (held & ControlState.Positive) != 0)
-					realValue = 0f;
-			}
-
-			value = realValue;
-
-			//We dont want to mess with the real value
-			//When considering dead values
-			if(Mathf.Abs(realValue) <= Mathf.Abs(dead))
-				value = 0f;
-
-			fixedValue = GetFV();
-		}
+		protected abstract void UpdateValues();
 
 		/// <summary>
 		/// Internally used to give a random name to a control if one is not provided.
@@ -238,37 +139,37 @@ namespace BSGTools.IO {
 		private static string GetRandomName() {
 			return "UNNAMED_" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 		}
+	}
 
-		/// <summary>
-		/// Returns a fixed control range float.
-		/// </summary>
-		/// <param name="f">A float to clamp.</param>
-		/// <returns>A float fixed to -1...1</returns>
-		public static float ClampRange(float f) {
-			return Mathf.Clamp(f, -1f, 1f);
+	public class YAMLView {
+		public string action { get; set; }
+		public byte controlType { get; set; }
+		public Scope scope { get; set; }
+		public byte controllerIndex { get; set; }
+		public Binding[] bindings { get; set; }
+		public ModifierFlags[] modifiers { get; set; }
+		public float[] multipliers { get; set; }
+
+		public YAMLView(Control c) {
+			this.action = c.identifier;
+			this.scope = c.scope;
+			this.controllerIndex = c.controllerIndex;
+
+			if(c is ActionControl) {
+				this.controlType = 0;
+				var ac = c as ActionControl;
+				this.bindings = ac.bindings.Select(b => b.Key).ToArray();
+				this.modifiers = ac.bindings.Values.ToArray();
+			}
+			else if(c is AxisControl) {
+				this.controlType = 1;
+				var ax = c as AxisControl;
+				this.bindings = ax.bindings.Select(b => b.Key).ToArray();
+				this.multipliers = ax.bindings.Values.ToArray();
+			}
 		}
 
-		/// <summary>
-		/// Rounds and clamps to a FixedValue sbyte.
-		/// </summary>
-		/// <param name="f">The value to round and clamp.</param>
-		/// <returns>-1, 1 or 0</returns>
-		public sbyte GetFV() {
-			if(down == ControlState.Positive || held == ControlState.Positive)
-				return 1;
-			else if(down == ControlState.Negative || held == ControlState.Negative)
-				return -1;
-			else
-				return 0;
-		}
-
-		/// <summary>
-		/// Rounds and clamps to a FixedValue float.
-		/// </summary>
-		/// <param name="f">The value to round and clamp.</param>
-		/// <returns>-1, 1 or 0</returns>
-		public float GetFVF() {
-			return (float)GetFV();
-		}
+		// For YAML serialization
+		public YAMLView() { }
 	}
 }

@@ -16,14 +16,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #if (UNITY_STANDALONE_WIN || UNITY_METRO) && !UNITY_EDITOR_OSX
 #define XBOX_ALLOWED
 #endif
-#if XBOX_ALLOWED
+#if UNITY_4_6
 #define NEW_UI
-
 #endif
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using BSGTools.IO.Xbox;
+using BSGTools.IO.XInput;
 using UnityEngine;
+using YamlDotNet.Serialization;
 
 namespace BSGTools.IO {
 
@@ -35,12 +38,9 @@ namespace BSGTools.IO {
 	[AddComponentMenu("BSGTools/InputMaster/InputMaster")]
 	public class InputMaster : MonoBehaviour {
 		#region Fields
-		[Header("Base Configurations")]
-		public StandaloneControlConfig standaloneConfig;
-		public XboxControlConfig xboxConfig;
-		public CombinedOutputsConfig combinedOutputs;
-
 		public static InputMaster instance { get; private set; }
+
+		List<Control> controls = new List<Control>();
 
 		/// <value>
 		/// Are any controls in an active Down state?
@@ -99,15 +99,53 @@ namespace BSGTools.IO {
 		/// The MouseWheel Axis raw axis value from Unity's native Input system.
 		/// </value>
 		public float mouseWheelRaw { get; private set; }
-
-		public CombinedOutput coUIHorizontal { get; set; }
-		public CombinedOutput coUIVertical { get; set; }
-		public CombinedOutput coUISubmit { get; set; }
-		public CombinedOutput coUICancel { get; set; }
 		#endregion
 
-		void Awake() {
+		bool initialized = false;
+
+		void Start() {
 			InputMaster.instance = this;
+			Initialize(Application.dataPath + "/config2.cfg");
+		}
+
+		public void Initialize(string cfgPath) {
+			//ReadControls(cfgPath);
+			controls.Add(new ActionControl(
+				new Binding[] { 
+					Binding.A 
+				},
+				new ModifierFlags[] { 
+					ModifierFlags.None 
+				})
+			);
+			controls.Add(new AxisControl(
+				new Binding[] { 
+					Binding.A 
+				},
+				new float[]{ 
+					1f
+				})
+			);
+
+			WriteControls(cfgPath);
+			initialized = true;
+		}
+
+		public void ReadControls(string cfgPath) {
+			var d = new Deserializer();
+			using(var reader = new StreamReader(cfgPath)) {
+				var value = d.Deserialize<YAMLView[]>(reader);
+				controls = value.Select(y => Control.FromYAMLView(y)).ToList();
+			}
+		}
+
+		public void WriteControls(string cfgPath) {
+			var s = new Serializer();
+			var graph = controls.Select(c => c.GetYAMLView()).ToArray();
+			using(var writer = new StreamWriter(cfgPath)) {
+				writer.AutoFlush = true;
+				s.Serialize(writer, graph);
+			}
 		}
 
 		/// <summary>
@@ -115,11 +153,8 @@ namespace BSGTools.IO {
 		/// </summary>
 		/// <seealso cref="ResetAll(bool)"/>
 		public void ResetAll() {
-			foreach(var c in standaloneConfig.controls)
-				c.Reset();
-			xboxConfig.ForEach((c) => {
-				c.Reset();
-			});
+			//foreach(var c in controlConfig.controls)
+			//	c.Reset();
 		}
 
 		/// <summary>
@@ -129,39 +164,41 @@ namespace BSGTools.IO {
 		/// <param name="blocked">To block/unblock.</param>
 		/// <seealso cref="Control.blocked"/>
 		public void SetBlockAll(bool blocked) {
-			foreach(var c in standaloneConfig.controls)
-				c.blocked = blocked;
-			xboxConfig.ForEach((c) => {
-				c.blocked = blocked;
-			});
+			//foreach(var c in controlConfig.controls)
+			//	c.blocked = blocked;
 		}
 
 
 		private void OnApplicationFocus(bool focused) {
 #if XBOX_ALLOWED
-			if(XboxUtils.StopVibrateOnAppFocusLost && focused == false)
-				XboxUtils.SetVibrationAll(0f);
+			if(XInputUtils.StopVibrateOnAppFocusLost && focused == false)
+				XInputUtils.SetVibrationAll(0f);
 #endif
 		}
 
 		private void OnApplicationPause(bool paused) {
 #if XBOX_ALLOWED
-			if(XboxUtils.StopVibrateOnAppPause && paused == true)
-				XboxUtils.SetVibrationAll(0f);
+			if(XInputUtils.StopVibrateOnAppPause && paused == true)
+				XInputUtils.SetVibrationAll(0f);
 #endif
 		}
 
 		private void OnApplicationQuit() {
 #if XBOX_ALLOWED
-			XboxUtils.SetVibrationAll(0f);
+			XInputUtils.SetVibrationAll(0f);
 #endif
 			SetBlockAll(false);
 		}
 
 
 		void Update() {
+			if(!initialized) {
+				Debug.LogError("Must call <color=blue>Initialize()</color> before updates can begin!");
+				return;
+			}
+
 #if XBOX_ALLOWED
-			XboxUtils.UpdateStates();
+			XInputUtils.UpdateStates();
 #endif
 			if(mouseMovementBlocked) {
 				mouseX = 0f;
@@ -186,116 +223,60 @@ namespace BSGTools.IO {
 			anyControlHeld = false;
 			anyControlUp = false;
 
-			if(standaloneConfig != null)
-				foreach(var c in standaloneConfig.controls)
+			if(controls != null)
+				foreach(var c in controls)
 					UpdateControl(c);
-			if(xboxConfig != null) {
-				xboxConfig.For((c) => {
-					UpdateControl(c);
-				});
-			}
 		}
 
 		private void UpdateControl(Control c) {
-			if((c.debugOnly && Debug.isDebugBuild) || c.debugOnly == false) {
+			if(CheckScope(c)) {
 				c.Update();
 
-				if((c.down & ControlState.Either) != 0)
-					anyControlDown = true;
-				if((c.held & ControlState.Either) != 0)
-					anyControlHeld = true;
-				if((c.up & ControlState.Either) != 0)
-					anyControlUp = true;
+				//if((c.down & ControlState.Either) != 0)
+				//	anyControlDown = true;
+				//if((c.held & ControlState.Either) != 0)
+				//	anyControlHeld = true;
+				//if((c.up & ControlState.Either) != 0)
+				//	anyControlUp = true;
 			}
 		}
 
-		public bool HasControl(string identifier) {
-			bool hasControl = false;
-			if(standaloneConfig != null)
-				hasControl = standaloneConfig.controls.Any(c1 => c1.identifier == identifier);
-			if(hasControl == false && xboxConfig != null)
-				hasControl = xboxConfig.Any(c1 => c1.identifier == identifier);
-			return hasControl;
+		private static bool CheckScope(Control c) {
+			switch(c.scope) {
+				case Scope.Release:
+					return Application.isEditor == false;
+				case Scope.Editor:
+					return Application.isEditor;
+				default:
+					return true;
+			}
 		}
 
 		public T GetControl<T>(string identifier) where T : Control {
-			// Get first StandaloneControl
-			if(standaloneConfig != null && typeof(T) == typeof(StandaloneControl)) {
-				for(int i = 0;i < combinedOutputs.outputs.Count;i++) {
-					if(standaloneConfig.controls[i].identifier == identifier)
-						return standaloneConfig.controls[i] as T;
-				}
-			}
-			if(xboxConfig != null) {
-				// Get first XButtonControl
-				if(typeof(T) == typeof(XButtonControl)) {
-					for(int i = 0;i < xboxConfig.xbControls.Count;i++) {
-						var xb = xboxConfig.xbControls[i];
-						if(xb.identifier == identifier)
-							return xb as T;
-					}
-				}
-
-				// Get first XStickControl
-				else if(typeof(T) == typeof(XStickControl)) {
-					for(int i = 0;i < xboxConfig.xsControls.Count;i++) {
-						var xs = xboxConfig.xsControls[i];
-						if(xs.identifier == identifier)
-							return xs as T;
-					}
-				}
-
-				// If not found, get first XTriggerControl
-				else if(typeof(T) == typeof(XTriggerControl)) {
-					for(int i = 0;i < xboxConfig.xtControls.Count;i++) {
-						var xt = xboxConfig.xtControls[i];
-						if(xt.identifier == identifier)
-							return xt as T;
-					}
-				}
-			}
-			return null;
+			return controls.OfType<T>().FirstOrDefault(c => c.identifier == identifier);
 		}
 
-		public Control GetControl(string identifier) {
-			// Get first StandaloneControl
-			if(standaloneConfig != null) {
-				for(int i = 0;i < combinedOutputs.outputs.Count;i++) {
-					if(standaloneConfig.controls[i].identifier == identifier)
-						return standaloneConfig.controls[i];
-				}
-			}
-			if(xboxConfig != null) {
-				// Get first XButtonControl
-				for(int i = 0;i < xboxConfig.xbControls.Count;i++) {
-					var xb = xboxConfig.xbControls[i];
-					if(xb.identifier == identifier)
-						return xb;
-				}
-
-				// Get first XStickControl
-				for(int i = 0;i < xboxConfig.xsControls.Count;i++) {
-					var xs = xboxConfig.xsControls[i];
-					if(xs.identifier == identifier)
-						return xs;
-				}
-
-				// If not found, get first XTriggerControl
-				for(int i = 0;i < xboxConfig.xtControls.Count;i++) {
-					var xt = xboxConfig.xtControls[i];
-					if(xt.identifier == identifier)
-						return xt;
-				}
-			}
-			return null;
+		public bool TryGetControl<T>(string identifier, out T control) where T : Control {
+			control = GetControl<T>(identifier);
+			return control != null;
 		}
 
-		public CombinedOutput GetCombinedOutput(string identifier) {
-			for(int i = 0;i < combinedOutputs.outputs.Count;i++)
-				if(combinedOutputs.outputs[i].identifier == identifier)
-					return combinedOutputs.outputs[i];
+		public ActionControl GetAction(string identifier) {
+			return controls.OfType<ActionControl>().FirstOrDefault(c => c.identifier == identifier);
+		}
 
-			return null;
+		public bool TryGetAction(string identifier, out ActionControl control) {
+			control = GetAction(identifier);
+			return control != null;
+		}
+
+		public AxisControl GetAxis(string identifier) {
+			return controls.OfType<AxisControl>().FirstOrDefault(c => c.identifier == identifier);
+		}
+
+		public bool TryGetAxis(string identifier, out AxisControl control) {
+			control = GetAxis(identifier);
+			return control != null;
 		}
 	}
 }

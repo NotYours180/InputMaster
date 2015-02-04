@@ -25,7 +25,8 @@ namespace BSGTools.Events {
 		m_Submit = "Submit",
 		m_Cancel = "Cancel";
 
-		CombinedOutput coHorizontal, coVertical, coSubmit, coCancel;
+		AxisControl horizontal, vertical;
+		ActionControl submit, cancel;
 
 		[SerializeField]
 		private float m_InputActionsPerSecond = 10;
@@ -46,18 +47,6 @@ namespace BSGTools.Events {
 		public override void UpdateModule() {
 			m_LastMousePosition = m_MousePosition;
 			m_MousePosition = Input.mousePosition;
-
-			var co = InputMaster.instance.GetCombinedOutput(m_Horizontal);
-			coHorizontal = (co == null) ? CombinedOutput.none : co;
-
-			co = InputMaster.instance.GetCombinedOutput(m_Vertical);
-			coVertical = (co == null) ? CombinedOutput.none : co;
-
-			co = InputMaster.instance.GetCombinedOutput(m_Submit);
-			coSubmit = (co == null) ? CombinedOutput.none : co;
-
-			co = InputMaster.instance.GetCombinedOutput(m_Cancel);
-			coCancel = (co == null) ? CombinedOutput.none : co;
 		}
 
 		public override bool IsModuleSupported() {
@@ -71,10 +60,10 @@ namespace BSGTools.Events {
 			if(!base.ShouldActivateModule())
 				return false;
 
-			var shouldActivate = coSubmit.anyDownPositive;
-			shouldActivate |= coCancel.anyDownPositive;
-			shouldActivate |= !Mathf.Approximately(coHorizontal.fixedValueF, 0.0f);
-			shouldActivate |= !Mathf.Approximately(coVertical.fixedValueF, 0.0f);
+			var shouldActivate = submit.state == State.Down;
+			shouldActivate |= cancel.state == State.Down;
+			shouldActivate |= !Mathf.Approximately(horizontal.value, 0.0f);
+			shouldActivate |= !Mathf.Approximately(horizontal.value, 0.0f);
 			shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
 			shouldActivate |= Input.GetMouseButtonDown(0);
 			return shouldActivate;
@@ -121,39 +110,23 @@ namespace BSGTools.Events {
 				return false;
 
 			var data = GetBaseEventData();
-			if(coSubmit.anyDownPositive)
+			if(submit.state == State.Down)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.submitHandler);
 
-			if(coCancel.anyDownPositive)
+			if(cancel.state == State.Down)
 				ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.cancelHandler);
 			return data.used;
 		}
 
 		private bool AllowMoveEventProcessing(float time) {
-			bool allow = coHorizontal.anyDownPositive;
-			allow |= coVertical.anyDownPositive;
+			bool allow = horizontal.rValue != 0f;
+			allow |= vertical.rValue != 0f;
 			allow |= (time > m_NextAction);
 			return allow;
 		}
 
 		private Vector2 GetRawMoveVector() {
-			Vector2 move = Vector2.zero;
-			move.x = coHorizontal.fixedValueF;
-			move.y = coVertical.fixedValueF;
-
-			if(coHorizontal.anyDownPositive) {
-				if(move.x < 0)
-					move.x = -1f;
-				if(move.x > 0)
-					move.x = 1f;
-			}
-			if(coVertical.anyDownPositive) {
-				if(move.y < 0)
-					move.y = -1f;
-				if(move.y > 0)
-					move.y = 1f;
-			}
-			return move;
+			return new Vector2(horizontal.value, vertical.value);
 		}
 
 		/// <summary>

@@ -20,12 +20,12 @@ using XInputDotNetPure;
 
 #endif
 
-namespace BSGTools.IO.Xbox {
+namespace BSGTools.IO.XInput {
 
 	/// <summary>
 	/// A static utility class for minimal required updates for <see cref="XboxControl"/>s.
 	/// </summary>
-	public static class XboxUtils {
+	public static class XInputUtils {
 #if XBOX_ALLOWED
 		public const int MAX_CONTROLLER_COUNT = 4;
 
@@ -52,7 +52,7 @@ namespace BSGTools.IO.Xbox {
 		/// </value>
 		public static bool StopVibrateOnAppPause { get; set; }
 
-		static XboxUtils() {
+		static XInputUtils() {
 			StopVibrateOnAppFocusLost = true;
 			StopVibrateOnAppPause = true;
 		}
