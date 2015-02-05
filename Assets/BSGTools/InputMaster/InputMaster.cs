@@ -100,24 +100,6 @@ namespace BSGTools.IO {
 			initialized = true;
 		}
 
-		public static YAMLView[] ReadControls(string cfgPath) {
-			YAMLView[] views = null;
-			var d = new Deserializer();
-			using(var reader = new StreamReader(cfgPath)) {
-				views = d.Deserialize<YAMLView[]>(reader);
-			}
-			return views;
-		}
-
-		public static void WriteControls(string cfgPath) {
-			var s = new Serializer();
-			var graph = controls.Where(c => c.scope != Scope.EditorOnly).Select(c => c.GetYAMLView()).ToArray();
-			using(var writer = new StreamWriter(cfgPath)) {
-				writer.AutoFlush = true;
-				s.Serialize(writer, graph);
-			}
-		}
-
 		/// <summary>
 		/// Resets all states/values on all controls.
 		/// </summary>

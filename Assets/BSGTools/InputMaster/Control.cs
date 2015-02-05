@@ -108,8 +108,8 @@ namespace BSGTools.IO {
 
 		}
 
-		public YAMLView GetYAMLView() {
-			return new YAMLView(this);
+		public SimpleDataView GetSimpleDataView() {
+			return new SimpleDataView(this);
 		}
 
 		/// <summary>
@@ -124,28 +124,5 @@ namespace BSGTools.IO {
 		private static string GetRandomName() {
 			return "UNNAMED_" + Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 		}
-	}
-
-	public class YAMLView {
-		public string identifier { get; set; }
-		public Binding[] bindings { get; set; }
-		public ModifierFlags[] modifiers { get; set; }
-
-		public YAMLView(Control c) {
-			this.identifier = c.identifier;
-
-			if(c is ActionControl) {
-				var ac = c as ActionControl;
-				this.bindings = ac.bindings.Select(b => b.Key).ToArray();
-				this.modifiers = ac.bindings.Values.ToArray();
-			}
-			else if(c is AxisControl) {
-				var ax = c as AxisControl;
-				this.bindings = ax.bindings.Select(b => b.Key).ToArray();
-			}
-		}
-
-		// For YAML serialization
-		public YAMLView() { }
 	}
 }
